@@ -77,4 +77,8 @@ DerivedDataCache/*
 # Ignore unnecessary files
 VampireLike3d/Binaries/
 VampireLike3d/Saved/
-VampireLike3d/Intermediate
+VampireLike3d/Intermediate/
+VampireLike3d/Build/
+
+#Ignore thirdpary files
+VampireLike3d/Content/ThirdParty/
