@@ -19,7 +19,7 @@ public:
 	virtual void NativeUpdateAnimation(float DeltaTime) override;
 
 	UPROPERTY(BlueprintReadOnly)
-	class AMainCharacter* MainCharacter;
+	class ABaseCharacter* BaseCharacter;
 
 	UPROPERTY(BlueprintReadOnly, Category = Movement)
 	class UCharacterMovementComponent* WarriorCharacterMovement;

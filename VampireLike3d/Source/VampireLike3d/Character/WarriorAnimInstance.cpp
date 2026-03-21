@@ -2,7 +2,7 @@
 
 
 #include "Character/WarriorAnimInstance.h"
-#include "Character/MainCharacter.h"
+#include "Character/BaseCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 
@@ -10,10 +10,10 @@ void UWarriorAnimInstance::NativeInitializeAnimation()
 {
 	Super::NativeInitializeAnimation();
 
-	MainCharacter = Cast<AMainCharacter>(TryGetPawnOwner());
-	if (MainCharacter)
+	BaseCharacter = Cast<ABaseCharacter>(TryGetPawnOwner());
+	if (BaseCharacter)
 	{
-		WarriorCharacterMovement = MainCharacter->GetCharacterMovement();
+		WarriorCharacterMovement = BaseCharacter->GetCharacterMovement();
 	}
 }
 

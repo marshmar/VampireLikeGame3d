@@ -1,13 +1,14 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Character/MainCharacter.h"
+#include "Character/BaseCharacter.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Camera/PlayerCameraManager.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "PartyManager.h"
 
-AMainCharacter::AMainCharacter()
+ABaseCharacter::ABaseCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -15,41 +16,51 @@ AMainCharacter::AMainCharacter()
 	bUseControllerRotationYaw = false;
 	bUseControllerRotationRoll = false;
 
-
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	GetCharacterMovement()->RotationRate = FRotator(0.f, 400.f, 0.f);
 
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(GetRootComponent());
 	CameraBoom->TargetArmLength = 600.0f;
+	CameraBoom->SetRelativeLocation(FVector(0, 0, 100.f));
+	CameraBoom->bUsePawnControlRotation = true;
 
 	ViewCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("ViewCamera"));
 	ViewCamera->SetupAttachment(CameraBoom);
+	ViewCamera->bUsePawnControlRotation = false;
+
+
 }
 
-void AMainCharacter::BeginPlay()
+void ABaseCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	//LimitPitchDegree();
+	
+	PartyManager = GetGameInstance()->GetSubsystem<UPartyManager>();
+
+	//if (PartyManager)
+	//{
+	//	PartyManager->AddPartyMember(this);
+	//}
 }
 
-void AMainCharacter::Tick(float DeltaTime)
+void ABaseCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
 }
 
-void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	PlayerInputComponent->BindAxis(FName("MoveForward"), this, &AMainCharacter::MoveForward);
-	PlayerInputComponent->BindAxis(FName("MoveRight"), this, &AMainCharacter::MoveRight);
-	PlayerInputComponent->BindAxis(FName("Turn"), this, &AMainCharacter::Turn);
-	//PlayerInputComponent->BindAxis(FName("LookUp"), this, &AMainCharacter::LookUp);
+	PlayerInputComponent->BindAxis(FName("MoveForward"), this, &ABaseCharacter::MoveForward);
+	PlayerInputComponent->BindAxis(FName("MoveRight"), this, &ABaseCharacter::MoveRight);
+	PlayerInputComponent->BindAxis(FName("Turn"), this, &ABaseCharacter::Turn);
+	PlayerInputComponent->BindAction(FName("Swap"), IE_Pressed, this, &ABaseCharacter::SwapCharacter);
 }
 
-void AMainCharacter::MoveForward(float Value)
+void ABaseCharacter::MoveForward(float Value)
 {
 	if (Controller && (Value != 0.f))
 	{
@@ -62,7 +73,7 @@ void AMainCharacter::MoveForward(float Value)
 	}
 }
 
-void AMainCharacter::MoveRight(float Value)
+void ABaseCharacter::MoveRight(float Value)
 {
 	if (Controller && (Value != 0.f))
 	{
@@ -75,24 +86,24 @@ void AMainCharacter::MoveRight(float Value)
 	}
 }
 
-void AMainCharacter::Turn(float Value)
+void ABaseCharacter::Turn(float Value)
 {
 	AddControllerYawInput(Value);
 }
 
-void AMainCharacter::LookUp(float Value)
+void ABaseCharacter::SwapCharacter()
 {
-	AddControllerPitchInput(Value);
-}
-
-void AMainCharacter::LimitPitchDegree()
-{
-	APlayerController* PC = Cast<APlayerController>(GetController());
-	if (PC)
+	if (PartyManager)
 	{
-		PC->PlayerCameraManager->ViewPitchMin = ViewPitchMinVal;
-		PC->PlayerCameraManager->ViewPitchMax = ViewPitchMaxVal;
+		PartyManager->SwapCharacterToNext();
+		UE_LOG(LogTemp, Warning, TEXT("Swap to next Character"));
 	}
 }
+
+void ABaseCharacter::SetCameraBoomPawnControlRotation(bool State)
+{
+	CameraBoom->bUsePawnControlRotation = State;
+}
+
 
 
