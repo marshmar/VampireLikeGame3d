@@ -15,24 +15,13 @@ void AMyGameModeBase::BeginPlay()
         CharacterClass1, CharacterClass2, CharacterClass3
     };
 
-    for (int32 i = 0; i < Classes.Num(); i++)
-    {
-        if (!Classes[i]) continue;
+	for (int32 i = 0; i < Classes.Num(); i++)
+	{
+		if (!Classes[i]) continue;
 
-        ABaseCharacter* Spawned = GetWorld()->SpawnActor<ABaseCharacter>(
-            Classes[i], FVector::ZeroVector, FRotator::ZeroRotator);
+		PartyManager->AddPartyMember(Classes[i]);
+	}
 
-        if (Spawned)
-        {
-            if (i != 0)
-            {
-                Spawned->SetActorHiddenInGame(true);
-                Spawned->SetActorEnableCollision(false);
-                Spawned->SetActorTickEnabled(false);
-            }
-            PartyManager->AddPartyMember(Spawned);
-        }
-    }
-
+	PartyManager->SpawnPartyMembers();
     PartyManager->SwapCharacter(0);
 }

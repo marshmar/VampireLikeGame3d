@@ -12,40 +12,58 @@ void UPartyManager::Initialize(FSubsystemCollectionBase& Collection)
 
 void UPartyManager::Deinitialize()
 {
+	SpawnedPartyMembers.Empty();
 	PartyMembers.Empty();
+
 	Super::Deinitialize();
 }
 
-void UPartyManager::AddPartyMember(ABaseCharacter* Character)
+void UPartyManager::SpawnPartyMembers()
+{
+	for (int32 i = 0; i < PartyMembers.Num(); i++)
+	{
+		if (!PartyMembers[i]) continue;
+
+		ABaseCharacter* Spawned = GetWorld()->SpawnActor<ABaseCharacter>(
+			PartyMembers[i], FVector::ZeroVector, FRotator::ZeroRotator);
+
+		if (Spawned)
+		{
+			if (i != 0)
+			{
+				Spawned->SetActorHiddenInGame(true);
+				Spawned->SetActorEnableCollision(false);
+				Spawned->SetActorTickEnabled(false);
+			}
+			SpawnedPartyMembers.Add(Spawned);
+		}
+	}
+}
+
+void UPartyManager::AddPartyMember(TSubclassOf<ABaseCharacter> Character)
 {
 	if (!Character) return;
 	if (PartyMembers.Num() >= 3) return;
-
 
 	PartyMembers.Add(Character);
 }
 
 void UPartyManager::SwapCharacter(int32 SlotIndex)
 {
-	if (!PartyMembers.IsValidIndex(SlotIndex)) return;
+	if (!SpawnedPartyMembers.IsValidIndex(SlotIndex)) return;
 
-	ABaseCharacter* NewCharacter = PartyMembers[SlotIndex];
+	ABaseCharacter* NewCharacter = SpawnedPartyMembers[SlotIndex];
 	if (!NewCharacter) return;
 
 	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
 	if (!PlayerController) return;
 
-	UE_LOG(LogTemp, Warning, TEXT("ActiveIndex: %d, SlotIndex: %d, PartySize: %d"),
-		ActiveIndex, SlotIndex, PartyMembers.Num());
-
 	FRotator CameraRotation = FRotator::ZeroRotator;
 
 	if (ActiveIndex != SlotIndex)
 	{
-		ABaseCharacter* CurrentCharacter = PartyMembers[ActiveIndex];
+		ABaseCharacter* CurrentCharacter = SpawnedPartyMembers[ActiveIndex];
 		if (!CurrentCharacter) return;
-
-		UE_LOG(LogTemp, Warning, TEXT("비활성화: %s"), *CurrentCharacter->GetName());
 
 		CameraRotation = PlayerController->GetControlRotation();
 
@@ -73,10 +91,17 @@ void UPartyManager::SwapCharacter(int32 SlotIndex)
 
 void UPartyManager::SwapCharacterToNext()
 {
-	SwapCharacter((ActiveIndex + 1) % PartyMembers.Num());	
+	SwapCharacter((ActiveIndex + 1) % SpawnedPartyMembers.Num());	
 }
 
 void UPartyManager::SwapCharacterToBef()
 {
+	SwapCharacter(((ActiveIndex - 1) + SpawnedPartyMembers.Num()) % SpawnedPartyMembers.Num());
+}
 
+
+
+ABaseCharacter* UPartyManager::GetCurrentCharacter()
+{
+	return SpawnedPartyMembers[ActiveIndex];
 }

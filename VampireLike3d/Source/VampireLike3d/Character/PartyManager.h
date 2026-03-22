@@ -17,13 +17,17 @@ public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;
 
-	void AddPartyMember(ABaseCharacter* CharacterClass);
+	void SpawnPartyMembers();
+	void AddPartyMember(TSubclassOf<ABaseCharacter> Character);
+
 	void SwapCharacter(int32);
 	void SwapCharacterToNext();
 	void SwapCharacterToBef();
 
+	ABaseCharacter* GetCurrentCharacter();
 private:
-	TArray<ABaseCharacter*> PartyMembers;
+	TArray<TSubclassOf<ABaseCharacter>> PartyMembers;
+	TArray<ABaseCharacter*> SpawnedPartyMembers;
 	int32 ActiveIndex;
 
 };
