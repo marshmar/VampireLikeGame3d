@@ -22,7 +22,10 @@ void UPartyManager::SpawnPartyMembers()
 {
 	for (int32 i = 0; i < PartyMembers.Num(); i++)
 	{
-		if (!PartyMembers[i]) continue;
+		if (!PartyMembers[i])
+		{
+			continue;
+		}
 
 		ABaseCharacter* Spawned = GetWorld()->SpawnActor<ABaseCharacter>(
 			PartyMembers[i], FVector::ZeroVector, FRotator::ZeroRotator);
@@ -42,28 +45,47 @@ void UPartyManager::SpawnPartyMembers()
 
 void UPartyManager::AddPartyMember(TSubclassOf<ABaseCharacter> Character)
 {
-	if (!Character) return;
-	if (PartyMembers.Num() >= 3) return;
+	if (!Character)
+	{
+		return;
+	}
+
+	if (PartyMembers.Num() >= 3)
+	{
+		return;
+	}
 
 	PartyMembers.Add(Character);
 }
 
 void UPartyManager::SwapCharacter(int32 SlotIndex)
 {
-	if (!SpawnedPartyMembers.IsValidIndex(SlotIndex)) return;
+	if (!SpawnedPartyMembers.IsValidIndex(SlotIndex))
+	{
+		return;
+	}
 
 	ABaseCharacter* NewCharacter = SpawnedPartyMembers[SlotIndex];
-	if (!NewCharacter) return;
+	if (!NewCharacter)
+	{
+		return;
+	}
 
 	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
-	if (!PlayerController) return;
+	if (!PlayerController)
+	{
+		return;
+	}
 
 	FRotator CameraRotation = FRotator::ZeroRotator;
 
 	if (ActiveIndex != SlotIndex)
 	{
 		ABaseCharacter* CurrentCharacter = SpawnedPartyMembers[ActiveIndex];
-		if (!CurrentCharacter) return;
+		if (!CurrentCharacter)
+		{
+			return;
+		}
 
 		CameraRotation = PlayerController->GetControlRotation();
 
@@ -86,6 +108,7 @@ void UPartyManager::SwapCharacter(int32 SlotIndex)
 	PlayerController->Possess(NewCharacter);
 	PlayerController->SetControlRotation(CameraRotation);
 	NewCharacter->SetCameraBoomPawnControlRotation(true);
+	NewCharacter->StartAttackTimer();
 	ActiveIndex = SlotIndex;
 }
 
@@ -98,8 +121,6 @@ void UPartyManager::SwapCharacterToBef()
 {
 	SwapCharacter(((ActiveIndex - 1) + SpawnedPartyMembers.Num()) % SpawnedPartyMembers.Num());
 }
-
-
 
 ABaseCharacter* UPartyManager::GetCurrentCharacter()
 {

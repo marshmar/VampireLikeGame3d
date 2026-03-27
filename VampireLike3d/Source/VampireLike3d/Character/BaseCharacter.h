@@ -58,6 +58,8 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	void SetCameraBoomPawnControlRotation(bool State);
+	virtual void StartAttackTimer();
+	virtual void StopAttackTimer();
 protected:
 
 	virtual void BeginPlay() override;
@@ -66,6 +68,8 @@ protected:
 	void MoveRight(float Value);
 	void Turn(float Value);
 	void SwapCharacter();
+	virtual void Attack();
+	virtual AActor* FindNearestEnemy();
 
 	UPROPERTY(VisibleAnywhere)
 	USpringArmComponent* CameraBoom;
@@ -74,4 +78,5 @@ protected:
 	UCameraComponent* ViewCamera;
 
 	UPartyManager* PartyManager;
+	FTimerHandle AttackTimerHandle;
 };

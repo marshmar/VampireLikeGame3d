@@ -7,6 +7,7 @@
 #include "Camera/PlayerCameraManager.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "PartyManager.h"
+#include "Enemies/BaseEnemy.h"
 
 ABaseCharacter::ABaseCharacter()
 {
@@ -28,8 +29,6 @@ ABaseCharacter::ABaseCharacter()
 	ViewCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("ViewCamera"));
 	ViewCamera->SetupAttachment(CameraBoom);
 	ViewCamera->bUsePawnControlRotation = false;
-
-
 }
 
 void ABaseCharacter::BeginPlay()
@@ -37,17 +36,11 @@ void ABaseCharacter::BeginPlay()
 	Super::BeginPlay();
 	
 	PartyManager = GetGameInstance()->GetSubsystem<UPartyManager>();
-
-	//if (PartyManager)
-	//{
-	//	PartyManager->AddPartyMember(this);
-	//}
 }
 
 void ABaseCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
 void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -98,10 +91,83 @@ void ABaseCharacter::SwapCharacter()
 		PartyManager->SwapCharacterToNext();
 		UE_LOG(LogTemp, Warning, TEXT("Swap to next Character"));
 	}
+
+	StopAttackTimer();
+}
+
+void ABaseCharacter::Attack()
+{
+	AActor* NearestEnemy = FindNearestEnemy();
+	if (!NearestEnemy)
+	{
+		return;
+	}
+	UE_LOG(LogTemp, Warning, TEXT("Object Name: %s Attack to %s"), *GetName(), *(NearestEnemy->GetName()));
+}
+
+AActor* ABaseCharacter::FindNearestEnemy()
+{
+	const float AttackDist = 1000.0f;
+	TArray<FOverlapResult> Overlaps;
+	FCollisionShape CollisionShape = FCollisionShape::MakeSphere(AttackDist);	// 각 캐릭터별 공격 사거리로 변경 필요.
+
+	FCollisionQueryParams QueryParams;
+	QueryParams.AddIgnoredActor(this);
+
+	const FVector CharLocation = GetActorLocation();
+	GetWorld()->OverlapMultiByChannel(
+		Overlaps,
+		CharLocation,
+		FQuat::Identity,
+		ECC_Pawn,
+		CollisionShape,
+		QueryParams
+	);
+
+	AActor* NearestEnemy = nullptr;
+	float MinDistance = FLT_MAX;
+
+	for (FOverlapResult& Overlap : Overlaps)
+	{
+		AActor* Enemy = Cast<ABaseEnemy>(Overlap.GetActor());
+		if (!Enemy)
+		{
+			continue;
+		}
+
+		float Distance = FVector::Dist(CharLocation, Enemy->GetActorLocation());
+		if (Distance < MinDistance)
+		{
+			MinDistance = Distance;
+			NearestEnemy = Enemy;
+		}
+	}
+
+	return NearestEnemy;
+}
+
+void ABaseCharacter::StartAttackTimer()
+{
+	GetWorldTimerManager().SetTimer(
+		AttackTimerHandle,
+		this,
+		&ABaseCharacter::Attack,
+		3.0f,
+		true
+	);
+}
+
+void ABaseCharacter::StopAttackTimer()
+{
+	GetWorldTimerManager().ClearTimer(AttackTimerHandle);
 }
 
 void ABaseCharacter::SetCameraBoomPawnControlRotation(bool State)
 {
+	if (!CameraBoom)
+	{
+		return;
+	}
 	CameraBoom->bUsePawnControlRotation = State;
 }
 

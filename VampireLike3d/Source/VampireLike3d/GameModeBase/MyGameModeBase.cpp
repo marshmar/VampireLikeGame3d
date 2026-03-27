@@ -9,7 +9,10 @@ void AMyGameModeBase::BeginPlay()
 	Super::BeginPlay();
 
     UPartyManager* PartyManager = GetGameInstance()->GetSubsystem<UPartyManager>();
-    if (!PartyManager) return;
+	if (!PartyManager)
+	{
+		return;
+	}
 
     TArray<TSubclassOf<ABaseCharacter>> Classes = {
         CharacterClass1, CharacterClass2, CharacterClass3
@@ -17,7 +20,10 @@ void AMyGameModeBase::BeginPlay()
 
 	for (int32 i = 0; i < Classes.Num(); i++)
 	{
-		if (!Classes[i]) continue;
+		if (!Classes[i])
+		{
+			continue;
+		}
 
 		PartyManager->AddPartyMember(Classes[i]);
 	}

@@ -30,7 +30,6 @@ AMainCharacter::AMainCharacter()
 void AMainCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	//LimitPitchDegree();
 }
 
 void AMainCharacter::Tick(float DeltaTime)
