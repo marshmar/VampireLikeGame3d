@@ -1,7 +1,10 @@
 #include "Enemies/BaseEnemy.h"
+#include "Enemies/EnemyAIController.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "GameFramework/CharacterMovementComponent.h"
+
 
 ABaseEnemy::ABaseEnemy()
 {
@@ -12,6 +15,11 @@ ABaseEnemy::ABaseEnemy()
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 	GetMesh()->SetGenerateOverlapEvents(true);
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+
+	AIControllerClass = AEnemyAIController::StaticClass();
+	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
+
+	GetCharacterMovement()->MaxWalkSpeed = 75.0;
 }
 
 void ABaseEnemy::BeginPlay()
@@ -20,6 +28,7 @@ void ABaseEnemy::BeginPlay()
 	
 	MaxHealth = 100.f;
 	Health = 100.f;
+
 }
 
 void ABaseEnemy::PlayMontage(const FName& SectionName, UAnimMontage* AnimMontage)
@@ -51,7 +60,6 @@ void ABaseEnemy::Die(const FVector& ImpactPoint)
 void ABaseEnemy::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
 void ABaseEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)

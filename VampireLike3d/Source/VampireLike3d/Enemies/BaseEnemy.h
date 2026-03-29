@@ -38,6 +38,7 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly)
 	EDeathPose DeathPose = EDeathPose::EDP_Alive;
+
 private:
 	/*
 	* Animation montages
