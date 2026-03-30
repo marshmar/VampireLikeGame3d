@@ -2,8 +2,8 @@
 #include "Enemies/EnemyAIController.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/CapsuleComponent.h"
-#include "Kismet/KismetSystemLibrary.h"
 #include "GameFramework/CharacterMovementComponent.h"
+//#include "Kismet/KismetSystemLibrary.h"
 
 
 ABaseEnemy::ABaseEnemy()
@@ -123,6 +123,8 @@ void ABaseEnemy::DirectionalHitReact(const FVector& ImpactPoint)
 {
 	const float Theta = CalculateHitDegree(ImpactPoint);
 
+	// Hit Direction Guide
+	// https://github.com/user-attachments/assets/e92be45f-3fdb-4a39-a2f5-f1246c1d1425
 	FName Section("FromBack");
 	if (Theta >= -45.f && Theta < 45.f)
 	{
@@ -138,8 +140,8 @@ void ABaseEnemy::DirectionalHitReact(const FVector& ImpactPoint)
 	}
 	PlayMontage(Section, HitReactMontage);
 
+	#pragma region Debug
 	//UKismetSystemLibrary::DrawDebugArrow(this, GetActorLocation(), GetActorLocation() + CrossProduct * 300, 5.f, FColor::Blue, 5.f);
-
 	//if (GEngine)
 	//{
 	//	GEngine->AddOnScreenDebugMessage(1, 5.f, FColor::Green, FString::Printf(TEXT("Theta: %f"), Theta));
@@ -147,6 +149,7 @@ void ABaseEnemy::DirectionalHitReact(const FVector& ImpactPoint)
 
 	//UKismetSystemLibrary::DrawDebugArrow(this, GetActorLocation(), GetActorLocation() + Forward * 60, 5.f, FColor::Red, 5.f);
 	//UKismetSystemLibrary::DrawDebugArrow(this, GetActorLocation(), GetActorLocation() + ToHit * 100, 5.f, FColor::Green, 5.f);
+	#pragma endregion
 }
 
 
