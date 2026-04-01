@@ -10,41 +10,7 @@
 class USpringArmComponent;
 class UCameraComponent;
 class UPartyManager;
-
-USTRUCT()
-struct FBaseStat
-{
-	GENERATED_BODY()
-
-	// HP
-	float MaxHP;
-	float CurHP;
-	float HPRecovery;
-	float LifeSteal;
-	float Shield;
-
-	// Atk
-	float AttackSpeed;
-	float CriticalChance;
-	float CriticalDamage;
-
-	// Def
-	float Armor;
-	float DamageReduction;
-	float DodgeChange;
-
-	// Movement
-	float MoveSpeed;
-
-	// Utils
-	float PickUpRadius;
-	float Luck;
-	float CoolDownDeduction; // Decrease Weapon Cool Time;
-
-	// EXP
-	float EXP;
-	float EXPGainRate;
-};
+class UCharacterAttributeComponent;
 
 UCLASS(Abstract)
 class VAMPIRELIKE3D_API ABaseCharacter : public ACharacter
@@ -60,6 +26,7 @@ public:
 	void SetCameraBoomPawnControlRotation(bool State);
 	virtual void StartAttackTimer();
 	virtual void StopAttackTimer();
+
 protected:
 
 	virtual void BeginPlay() override;
@@ -71,12 +38,28 @@ protected:
 	virtual void Attack();
 	virtual AActor* FindNearestEnemy();
 
+	/*
+	* Play montage functions
+	*/
+	void PlayMontage(const FName& SectionName, UAnimMontage* AnimMontage);
+
 	UPROPERTY(VisibleAnywhere)
 	USpringArmComponent* CameraBoom;
 
 	UPROPERTY(VisibleAnywhere)
 	UCameraComponent* ViewCamera;
 
+	UPROPERTY(VisibleAnywhere)
 	UPartyManager* PartyManager;
+
+	UPROPERTY(VisibleAnywhere)
 	FTimerHandle AttackTimerHandle;
+
+	UPROPERTY(VisibleAnywhere)
+	UCharacterAttributeComponent* AttributeComp;
+	/*
+	* Anim Montage
+	*/
+	UPROPERTY(EditDefaultsOnly, Category = Montages)
+	UAnimMontage* AttackMontage;
 };

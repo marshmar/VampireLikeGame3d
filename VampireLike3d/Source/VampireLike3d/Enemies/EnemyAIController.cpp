@@ -23,4 +23,10 @@ void AEnemyAIController::Tick(float DeltaTime)
 	}
 }
 
+void AEnemyAIController::UpdateTarget(APawn* NewCharacter)
+{
+	// No need to null-check NewCharacter here, as it is already validated in Enemy's UpdateTarget.
+	PlayerPawn = NewCharacter;
+}
+
 

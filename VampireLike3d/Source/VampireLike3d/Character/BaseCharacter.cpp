@@ -8,6 +8,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "PartyManager.h"
 #include "Enemies/BaseEnemy.h"
+#include "CharacterAttributeComponent.h"
 
 ABaseCharacter::ABaseCharacter()
 {
@@ -29,6 +30,9 @@ ABaseCharacter::ABaseCharacter()
 	ViewCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("ViewCamera"));
 	ViewCamera->SetupAttachment(CameraBoom);
 	ViewCamera->bUsePawnControlRotation = false;
+
+	// Set up Attribute Component
+	AttributeComp = CreateDefaultSubobject<UCharacterAttributeComponent>(TEXT("CharacterAttributeComponent"));
 }
 
 void ABaseCharacter::BeginPlay()
@@ -97,12 +101,17 @@ void ABaseCharacter::SwapCharacter()
 
 void ABaseCharacter::Attack()
 {
-	AActor* NearestEnemy = FindNearestEnemy();
-	if (!NearestEnemy)
+
+}
+
+void ABaseCharacter::PlayMontage(const FName& SectionName, UAnimMontage* AnimMontage)
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && AnimMontage)
 	{
-		return;
+		AnimInstance->Montage_Play(AnimMontage);
+		AnimInstance->Montage_JumpToSection(SectionName, AnimMontage);
 	}
-	UE_LOG(LogTemp, Warning, TEXT("Object Name: %s Attack to %s"), *GetName(), *(NearestEnemy->GetName()));
 }
 
 AActor* ABaseCharacter::FindNearestEnemy()

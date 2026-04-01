@@ -8,6 +8,8 @@
 
 class ABaseCharacter;
 
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnPlayerSwapped, APawn*);
+
 UCLASS()
 class VAMPIRELIKE3D_API UPartyManager : public UGameInstanceSubsystem
 {
@@ -25,6 +27,12 @@ public:
 	void SwapCharacterToBef();
 
 	ABaseCharacter* GetCurrentCharacter();
+
+	/*
+	* Delegate
+	*/
+	FOnPlayerSwapped OnPlayerSwapped;
+
 private:
 	TArray<TSubclassOf<ABaseCharacter>> PartyMembers;
 	TArray<ABaseCharacter*> SpawnedPartyMembers;

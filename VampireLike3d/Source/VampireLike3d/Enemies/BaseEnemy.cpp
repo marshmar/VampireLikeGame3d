@@ -1,11 +1,12 @@
 #include "Enemies/BaseEnemy.h"
 #include "Enemies/EnemyAIController.h"
+#include "Entity/AttributeComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Character/PartyManager.h"
+
 //#include "Kismet/KismetSystemLibrary.h"
-
-
 ABaseEnemy::ABaseEnemy()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -19,16 +20,32 @@ ABaseEnemy::ABaseEnemy()
 	AIControllerClass = AEnemyAIController::StaticClass();
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
-	GetCharacterMovement()->MaxWalkSpeed = 75.0;
+	// Set up Attribute Component
+	AttributeComp = CreateDefaultSubobject<UAttributeComponent>(TEXT("AttributeComponent"));
+	if (AttributeComp)
+	{
+		AttributeComp->SetMoveSpeed(75.0f);
+
+		// Set MoveSpeed
+		GetCharacterMovement()->MaxWalkSpeed = AttributeComp->GetMoveSpeed();
+	}
+
+
 }
 
 void ABaseEnemy::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	MaxHealth = 100.f;
-	Health = 100.f;
+	if (AttributeComp)
+	{
+		AttributeComp->SetMaxHP(100.f);
+		AttributeComp->SetCurHP(AttributeComp->GetMaxHP());
+	}
 
+	GetGameInstance()->GetSubsystem<UPartyManager>()->OnPlayerSwapped.AddUObject(
+		this, &ABaseEnemy::UpdateTarget
+	);
 }
 
 void ABaseEnemy::PlayMontage(const FName& SectionName, UAnimMontage* AnimMontage)
@@ -65,14 +82,16 @@ void ABaseEnemy::Tick(float DeltaTime)
 void ABaseEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
 }
 
 void ABaseEnemy::GetHit(const FVector& ImpactPoint)
 {
-	UE_LOG(LogTemp, Warning, TEXT("%s Damaged!"), *GetName());
+	if (!AttributeComp)
+	{
+		return;
+	}
 
-	if (IsAlive())
+	if (AttributeComp->IsAlive())
 	{
 		DirectionalHitReact(ImpactPoint);
 	}
@@ -81,17 +100,6 @@ void ABaseEnemy::GetHit(const FVector& ImpactPoint)
 		Die(ImpactPoint);
 	}
 
-}
-
-void ABaseEnemy::ReceiveDamage(float Damage)
-{
-	Health = FMath::Clamp(Health - Damage, 0.f, MaxHealth);
-	UE_LOG(LogTemp, Warning, TEXT("%s health: %f"), *GetName(), Health);
-}
-
-bool ABaseEnemy::IsAlive()
-{
-	return Health > 0.f;
 }
 
 float ABaseEnemy::CalculateHitDegree(const FVector& ImpactPoint)
@@ -152,10 +160,26 @@ void ABaseEnemy::DirectionalHitReact(const FVector& ImpactPoint)
 	#pragma endregion
 }
 
+void ABaseEnemy::UpdateTarget(APawn* NewCharacter)
+{
+	if (NewCharacter)
+	{
+		AEnemyAIController* AIController = Cast<AEnemyAIController>(GetController());
+		if (AIController)
+		{
+			AIController->UpdateTarget(NewCharacter);
+		}
+	}
+}
 
 float ABaseEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	ReceiveDamage(DamageAmount);
+	// TODO: AttributeComp에서 데미지 깎기 전에 버프/디버프 같은 효과 적용 필요
+	if (AttributeComp)
+	{
+		AttributeComp->ReceiveDamage(DamageAmount);
+	}
+
 	return 0.0f;
 }
 

@@ -17,7 +17,8 @@ class VAMPIRELIKE3D_API AEnemyAIController : public AAIController
 public:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
-
+	
+	void UpdateTarget(APawn* NewCharacter);
 private:
 	/*
 	* Navigation

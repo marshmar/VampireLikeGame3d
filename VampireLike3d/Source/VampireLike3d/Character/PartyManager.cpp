@@ -110,6 +110,10 @@ void UPartyManager::SwapCharacter(int32 SlotIndex)
 	NewCharacter->SetCameraBoomPawnControlRotation(true);
 	NewCharacter->StartAttackTimer();
 	ActiveIndex = SlotIndex;
+
+
+	// Broadcast player swap event
+	OnPlayerSwapped.Broadcast(Cast<APawn>(NewCharacter));
 }
 
 void UPartyManager::SwapCharacterToNext()

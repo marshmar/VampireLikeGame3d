@@ -52,4 +52,6 @@ void ARevenant::Attack()
 			LaserRotation
 		);
 	}
+
+	PlayMontage(FName("Attack"), AttackMontage);
 }
