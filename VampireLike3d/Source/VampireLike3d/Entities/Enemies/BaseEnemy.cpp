@@ -1,10 +1,11 @@
-#include "Enemies/BaseEnemy.h"
-#include "Enemies/EnemyAIController.h"
-#include "Entity/AttributeComponent.h"
+#include "BaseEnemy.h"
+#include "EnemyAIController.h"
+#include "Entities/AttributeComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "Character/PartyManager.h"
+#include "Systems/Party/PartyManager.h"
+#include "Kismet/GameplayStatics.h"
 
 //#include "Kismet/KismetSystemLibrary.h"
 ABaseEnemy::ABaseEnemy()
@@ -43,9 +44,11 @@ void ABaseEnemy::BeginPlay()
 		AttributeComp->SetCurHP(AttributeComp->GetMaxHP());
 	}
 
-	GetGameInstance()->GetSubsystem<UPartyManager>()->OnPlayerSwapped.AddUObject(
-		this, &ABaseEnemy::UpdateTarget
-	);
+	APartyManager* PartyManager = Cast<APartyManager>(UGameplayStatics::GetActorOfClass(GetWorld(), APartyManager::StaticClass()));
+	if (PartyManager)
+	{
+		PartyManager->OnPlayerSwapped.AddUObject(this, &ABaseEnemy::UpdateTarget);
+	}
 }
 
 void ABaseEnemy::PlayMontage(const FName& SectionName, UAnimMontage* AnimMontage)

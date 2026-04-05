@@ -1,14 +1,12 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
-#include "Character/BaseCharacter.h"
+#include "BaseCharacter.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Camera/PlayerCameraManager.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "PartyManager.h"
-#include "Enemies/BaseEnemy.h"
+#include "Systems/Party/PartyManager.h"
+#include "Entities/Enemies/BaseEnemy.h"
 #include "CharacterAttributeComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 ABaseCharacter::ABaseCharacter()
 {
@@ -39,7 +37,8 @@ void ABaseCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	PartyManager = GetGameInstance()->GetSubsystem<UPartyManager>();
+	PartyManager = Cast<APartyManager>(
+		UGameplayStatics::GetActorOfClass(GetWorld(), APartyManager::StaticClass()));
 }
 
 void ABaseCharacter::Tick(float DeltaTime)
@@ -99,10 +98,10 @@ void ABaseCharacter::SwapCharacter()
 	StopAttackTimer();
 }
 
-void ABaseCharacter::Attack()
-{
-
-}
+void ABaseCharacter::BasicAttack(){ }
+void ABaseCharacter::SwapAttack(){ }
+void ABaseCharacter::OnSwapAttackEffect(const FName& EffectName){ }
+void ABaseCharacter::OnSwapAttackHit(){ }
 
 void ABaseCharacter::PlayMontage(const FName& SectionName, UAnimMontage* AnimMontage)
 {
@@ -114,11 +113,10 @@ void ABaseCharacter::PlayMontage(const FName& SectionName, UAnimMontage* AnimMon
 	}
 }
 
-AActor* ABaseCharacter::FindNearestEnemy()
+AActor* ABaseCharacter::FindNearestEnemy(float Distance)
 {
-	const float AttackDist = 1000.0f;
 	TArray<FOverlapResult> Overlaps;
-	FCollisionShape CollisionShape = FCollisionShape::MakeSphere(AttackDist);	// 각 캐릭터별 공격 사거리로 변경 필요.
+	FCollisionShape CollisionShape = FCollisionShape::MakeSphere(Distance);	// 각 캐릭터별 공격 사거리로 변경 필요.
 
 	FCollisionQueryParams QueryParams;
 	QueryParams.AddIgnoredActor(this);
@@ -158,9 +156,9 @@ AActor* ABaseCharacter::FindNearestEnemy()
 void ABaseCharacter::StartAttackTimer()
 {
 	GetWorldTimerManager().SetTimer(
-		AttackTimerHandle,
+		BasicAttackTimerHandle,
 		this,
-		&ABaseCharacter::Attack,
+		&ABaseCharacter::BasicAttack,
 		3.0f,
 		true
 	);
@@ -168,7 +166,7 @@ void ABaseCharacter::StartAttackTimer()
 
 void ABaseCharacter::StopAttackTimer()
 {
-	GetWorldTimerManager().ClearTimer(AttackTimerHandle);
+	GetWorldTimerManager().ClearTimer(BasicAttackTimerHandle);
 }
 
 void ABaseCharacter::SetCameraBoomPawnControlRotation(bool State)

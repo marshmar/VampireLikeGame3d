@@ -1,4 +1,4 @@
-#include "Character/CharacterAttributeComponent.h"
+#include "CharacterAttributeComponent.h"
 
 #pragma region Getter & Setter
 /*

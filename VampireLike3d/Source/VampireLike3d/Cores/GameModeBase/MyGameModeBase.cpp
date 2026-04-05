@@ -1,14 +1,13 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
-#include "GameModeBase/MyGameModeBase.h"
-#include "Character/PartyManager.h"
+#include "MyGameModeBase.h"
+#include "Kismet/GameplayStatics.h"
+#include "Systems/Party/PartyManager.h"
 
 void AMyGameModeBase::BeginPlay()
 {
 	Super::BeginPlay();
 
-    UPartyManager* PartyManager = GetGameInstance()->GetSubsystem<UPartyManager>();
+	APartyManager* PartyManager = Cast<APartyManager>(
+		UGameplayStatics::GetActorOfClass(GetWorld(), APartyManager::StaticClass()));
 	if (!PartyManager)
 	{
 		return;

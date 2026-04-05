@@ -1,5 +1,5 @@
 
-#include "Entity/AttributeComponent.h"
+#include "AttributeComponent.h"
 
 UAttributeComponent::UAttributeComponent()
 {

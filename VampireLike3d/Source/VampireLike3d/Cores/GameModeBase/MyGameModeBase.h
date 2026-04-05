@@ -4,9 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
-#include "Character/BaseCharacter.h"
 #include "MyGameModeBase.generated.h"
 
+class ABaseCharacter;
 
 UCLASS()
 class VAMPIRELIKE3D_API AMyGameModeBase : public AGameModeBase

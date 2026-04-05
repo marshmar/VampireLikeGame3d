@@ -3,7 +3,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Interfaces/HitInterface.h"
-#include "Character/CharacterTypes.h"
+#include "Entities/Character/CharacterTypes.h"
 #include "BaseEnemy.generated.h"
 
 class UAnimMontage;
@@ -57,6 +57,4 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
 	float Health;	
-
-
 };

@@ -1,24 +1,20 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+#include "PartyManager.h"
+#include "SwapGaugeComponent.h"
 
-
-#include "Character/PartyManager.h"
-#include "BaseCharacter.h"
-
-void UPartyManager::Initialize(FSubsystemCollectionBase& Collection)
+APartyManager::APartyManager()
 {
-	Super::Initialize(Collection);
+	// Set up Components;
+	SwapGaugeComp = CreateDefaultSubobject<USwapGaugeComponent>(TEXT("SwapGaugeComponent"));
+}
+
+void APartyManager::BeginPlay()
+{
+	Super::BeginPlay();
 	ActiveIndex = 0;
 }
 
-void UPartyManager::Deinitialize()
-{
-	SpawnedPartyMembers.Empty();
-	PartyMembers.Empty();
 
-	Super::Deinitialize();
-}
-
-void UPartyManager::SpawnPartyMembers()
+void APartyManager::SpawnPartyMembers()
 {
 	for (int32 i = 0; i < PartyMembers.Num(); i++)
 	{
@@ -43,7 +39,7 @@ void UPartyManager::SpawnPartyMembers()
 	}
 }
 
-void UPartyManager::AddPartyMember(TSubclassOf<ABaseCharacter> Character)
+void APartyManager::AddPartyMember(TSubclassOf<ABaseCharacter> Character)
 {
 	if (!Character)
 	{
@@ -58,7 +54,7 @@ void UPartyManager::AddPartyMember(TSubclassOf<ABaseCharacter> Character)
 	PartyMembers.Add(Character);
 }
 
-void UPartyManager::SwapCharacter(int32 SlotIndex)
+void APartyManager::SwapCharacter(int32 SlotIndex)
 {
 	if (!SpawnedPartyMembers.IsValidIndex(SlotIndex))
 	{
@@ -87,23 +83,40 @@ void UPartyManager::SwapCharacter(int32 SlotIndex)
 			return;
 		}
 
-		CameraRotation = PlayerController->GetControlRotation();
+		if (!SwapGaugeComp)
+		{
+			return;
+		}
 
+		if (SwapGaugeComp->HasEnoughGaugeForSwapAttack())
+		{
+			CurrentCharacter->SetActorEnableCollision(false);
+			CurrentCharacter->SwapAttack();
+
+			CurrentCharacter->OnSwapAttackEnded.AddLambda([this, CurrentCharacter]()
+				{
+					DisableCharacter(CurrentCharacter);
+					CurrentCharacter->OnSwapAttackEnded.Clear();
+				});
+
+			SwapGaugeComp->ConsumeGauge();
+		}
+		else
+		{
+			// Disable Current Character
+			DisableCharacter(CurrentCharacter);
+		}
+
+
+		CameraRotation = PlayerController->GetControlRotation();
 		NewCharacter->SetActorLocation(CurrentCharacter->GetActorLocation());
 		NewCharacter->SetActorRotation(CurrentCharacter->GetActorRotation());
-			
-		// Disable Current Character
-		CurrentCharacter->SetActorHiddenInGame(true);
-		CurrentCharacter->SetActorEnableCollision(false);
-		CurrentCharacter->SetActorTickEnabled(false);
-
+		
 		// Enable New Character
-		NewCharacter->SetActorHiddenInGame(false);
-		NewCharacter->SetActorEnableCollision(true);
-		NewCharacter->SetActorTickEnabled(true);
-
+		EnableCharacter(NewCharacter);
 	}
-	
+
+
 	NewCharacter->SetCameraBoomPawnControlRotation(false);
 	PlayerController->Possess(NewCharacter);
 	PlayerController->SetControlRotation(CameraRotation);
@@ -116,17 +129,31 @@ void UPartyManager::SwapCharacter(int32 SlotIndex)
 	OnPlayerSwapped.Broadcast(Cast<APawn>(NewCharacter));
 }
 
-void UPartyManager::SwapCharacterToNext()
+void APartyManager::SwapCharacterToNext()
 {
 	SwapCharacter((ActiveIndex + 1) % SpawnedPartyMembers.Num());	
 }
 
-void UPartyManager::SwapCharacterToBef()
+void APartyManager::SwapCharacterToBef()
 {
 	SwapCharacter(((ActiveIndex - 1) + SpawnedPartyMembers.Num()) % SpawnedPartyMembers.Num());
 }
 
-ABaseCharacter* UPartyManager::GetCurrentCharacter()
+ABaseCharacter* APartyManager::GetCurrentCharacter()
 {
 	return SpawnedPartyMembers[ActiveIndex];
+}
+
+void APartyManager::DisableCharacter(ABaseCharacter* Character)
+{
+	Character->SetActorHiddenInGame(true);
+	Character->SetActorEnableCollision(false);
+	Character->SetActorTickEnabled(false);
+}
+
+void APartyManager::EnableCharacter(ABaseCharacter* Character)
+{
+	Character->SetActorHiddenInGame(false);
+	Character->SetActorEnableCollision(true);
+	Character->SetActorTickEnabled(true);
 }

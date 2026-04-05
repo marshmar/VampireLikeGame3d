@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Entity/AttributeComponent.h"
+#include "Entities/AttributeComponent.h"
 #include "CharacterAttributeComponent.generated.h"
 
 /**
