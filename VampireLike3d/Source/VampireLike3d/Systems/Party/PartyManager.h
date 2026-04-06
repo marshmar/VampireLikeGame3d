@@ -26,20 +26,27 @@ public:
 	void SpawnPartyMembers();
 	void AddPartyMember(TSubclassOf<ABaseCharacter> Character);
 
-	void SwapCharacter(int32);
+	void SwapCharacter(int32 SlotIndex);
 	void SwapCharacterToNext();
 	void SwapCharacterToBef();
+
 
 	ABaseCharacter* GetCurrentCharacter();
 
 protected:
 	virtual void BeginPlay() override;
+
 private:
 	USwapGaugeComponent* SwapGaugeComp;
 	TArray<TSubclassOf<ABaseCharacter>> PartyMembers;
 	TArray<ABaseCharacter*> SpawnedPartyMembers;
 	int32 ActiveIndex;
+	int32 MaxPartyMember;
 
 	void DisableCharacter(ABaseCharacter* Character);
 	void EnableCharacter(ABaseCharacter* Character);
+	bool IsValidSwap(int32 SlotIndex);
+	void HandlePreviousCharacter(int32 SlotIndex);
+	void TransferTransform(int32 SlotIndex);
+	void PossesCharacter(int32 SlotIndex);
 };

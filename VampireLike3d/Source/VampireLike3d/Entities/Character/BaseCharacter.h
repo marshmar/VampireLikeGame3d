@@ -9,6 +9,7 @@ class USpringArmComponent;
 class UCameraComponent;
 class APartyManager;
 class UCharacterAttributeComponent;
+class UBaseCharacterAnimInstance;
 
 DECLARE_MULTICAST_DELEGATE(FOnSwapAttackEnded);
 
@@ -74,7 +75,6 @@ protected:
 	void Turn(float Value);
 	void SwapCharacter();
 	virtual void BasicAttack();
-
 	virtual AActor* FindNearestEnemy(float Distance);
 
 	/*

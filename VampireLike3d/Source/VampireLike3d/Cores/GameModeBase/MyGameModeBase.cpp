@@ -28,5 +28,4 @@ void AMyGameModeBase::BeginPlay()
 	}
 
 	PartyManager->SpawnPartyMembers();
-    PartyManager->SwapCharacter(0);
 }

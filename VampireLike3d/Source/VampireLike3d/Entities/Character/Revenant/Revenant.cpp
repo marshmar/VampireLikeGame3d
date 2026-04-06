@@ -3,6 +3,8 @@
 #include "Revenant.h"
 #include "Interfaces/HitInterface.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
+#include "Entities/Character/BaseCharacterAnimInstance.h"
 
 void ARevenant::BasicAttack()
 {
@@ -57,7 +59,6 @@ void ARevenant::BasicAttack()
 
 void ARevenant::SwapAttack()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Revenant swapAttack Called"));
 	PlayMontage(FName("SwapAttack"), SwapAttackMontage);
 }
 

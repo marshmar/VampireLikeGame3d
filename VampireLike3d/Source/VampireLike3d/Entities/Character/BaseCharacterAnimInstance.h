@@ -22,6 +22,9 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = Movement)
 	float GroundSpeed;
 
+	float AimPitch;
+	float AimYaw;
+
 	/*
 	* Animation Notifty
 	*/

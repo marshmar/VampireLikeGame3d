@@ -7,6 +7,7 @@
 #include "Entities/Enemies/BaseEnemy.h"
 #include "CharacterAttributeComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "BaseCharacterAnimInstance.h"
 
 ABaseCharacter::ABaseCharacter()
 {
@@ -22,15 +23,17 @@ ABaseCharacter::ABaseCharacter()
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(GetRootComponent());
 	CameraBoom->TargetArmLength = 600.0f;
-	CameraBoom->SetRelativeLocation(FVector(0, 0, 100.f));
+	CameraBoom->SetRelativeLocation(FVector(0, 0, 300.f));
 	CameraBoom->bUsePawnControlRotation = true;
 
 	ViewCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("ViewCamera"));
 	ViewCamera->SetupAttachment(CameraBoom);
 	ViewCamera->bUsePawnControlRotation = false;
-
+	ViewCamera->SetRelativeLocation(FVector(-200.f, 0.f, 0.f));
+	ViewCamera->SetRelativeRotation(FRotator(-20.f, 0.f, 0.f));
 	// Set up Attribute Component
 	AttributeComp = CreateDefaultSubobject<UCharacterAttributeComponent>(TEXT("CharacterAttributeComponent"));
+
 }
 
 void ABaseCharacter::BeginPlay()

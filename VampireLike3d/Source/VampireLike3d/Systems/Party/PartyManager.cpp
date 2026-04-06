@@ -5,14 +5,15 @@ APartyManager::APartyManager()
 {
 	// Set up Components;
 	SwapGaugeComp = CreateDefaultSubobject<USwapGaugeComponent>(TEXT("SwapGaugeComponent"));
+
+	ActiveIndex = 0;
+	MaxPartyMember = 3;
 }
 
 void APartyManager::BeginPlay()
 {
 	Super::BeginPlay();
-	ActiveIndex = 0;
 }
-
 
 void APartyManager::SpawnPartyMembers()
 {
@@ -37,6 +38,8 @@ void APartyManager::SpawnPartyMembers()
 			SpawnedPartyMembers.Add(Spawned);
 		}
 	}
+
+	PossesCharacter(0);
 }
 
 void APartyManager::AddPartyMember(TSubclassOf<ABaseCharacter> Character)
@@ -46,7 +49,7 @@ void APartyManager::AddPartyMember(TSubclassOf<ABaseCharacter> Character)
 		return;
 	}
 
-	if (PartyMembers.Num() >= 3)
+	if (PartyMembers.Num() >= MaxPartyMember)
 	{
 		return;
 	}
@@ -56,77 +59,17 @@ void APartyManager::AddPartyMember(TSubclassOf<ABaseCharacter> Character)
 
 void APartyManager::SwapCharacter(int32 SlotIndex)
 {
-	if (!SpawnedPartyMembers.IsValidIndex(SlotIndex))
+	if (!IsValidSwap(SlotIndex))
 	{
 		return;
 	}
-
-	ABaseCharacter* NewCharacter = SpawnedPartyMembers[SlotIndex];
-	if (!NewCharacter)
-	{
-		return;
-	}
-
-	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
-	if (!PlayerController)
-	{
-		return;
-	}
-
-	FRotator CameraRotation = FRotator::ZeroRotator;
 
 	if (ActiveIndex != SlotIndex)
 	{
-		ABaseCharacter* CurrentCharacter = SpawnedPartyMembers[ActiveIndex];
-		if (!CurrentCharacter)
-		{
-			return;
-		}
-
-		if (!SwapGaugeComp)
-		{
-			return;
-		}
-
-		if (SwapGaugeComp->HasEnoughGaugeForSwapAttack())
-		{
-			CurrentCharacter->SetActorEnableCollision(false);
-			CurrentCharacter->SwapAttack();
-
-			CurrentCharacter->OnSwapAttackEnded.AddLambda([this, CurrentCharacter]()
-				{
-					DisableCharacter(CurrentCharacter);
-					CurrentCharacter->OnSwapAttackEnded.Clear();
-				});
-
-			SwapGaugeComp->ConsumeGauge();
-		}
-		else
-		{
-			// Disable Current Character
-			DisableCharacter(CurrentCharacter);
-		}
-
-
-		CameraRotation = PlayerController->GetControlRotation();
-		NewCharacter->SetActorLocation(CurrentCharacter->GetActorLocation());
-		NewCharacter->SetActorRotation(CurrentCharacter->GetActorRotation());
-		
-		// Enable New Character
-		EnableCharacter(NewCharacter);
+		HandlePreviousCharacter(SlotIndex);
+		TransferTransform(SlotIndex);
+		PossesCharacter(SlotIndex);
 	}
-
-
-	NewCharacter->SetCameraBoomPawnControlRotation(false);
-	PlayerController->Possess(NewCharacter);
-	PlayerController->SetControlRotation(CameraRotation);
-	NewCharacter->SetCameraBoomPawnControlRotation(true);
-	NewCharacter->StartAttackTimer();
-	ActiveIndex = SlotIndex;
-
-
-	// Broadcast player swap event
-	OnPlayerSwapped.Broadcast(Cast<APawn>(NewCharacter));
 }
 
 void APartyManager::SwapCharacterToNext()
@@ -156,4 +99,98 @@ void APartyManager::EnableCharacter(ABaseCharacter* Character)
 	Character->SetActorHiddenInGame(false);
 	Character->SetActorEnableCollision(true);
 	Character->SetActorTickEnabled(true);
+}
+
+bool APartyManager::IsValidSwap(int32 SlotIndex)
+{
+	if (!SpawnedPartyMembers.IsValidIndex(SlotIndex))
+	{
+		return false;
+	}
+
+	return true;
+}
+
+void APartyManager::HandlePreviousCharacter(int32 SlotIndex)
+{
+	ABaseCharacter* CurrentCharacter = SpawnedPartyMembers[ActiveIndex];
+	if (!CurrentCharacter)
+	{
+		return;
+	}
+
+	if (!SwapGaugeComp)
+	{
+		return;
+	}
+
+	if (SwapGaugeComp->HasEnoughGaugeForSwapAttack())
+	{
+		CurrentCharacter->SetActorEnableCollision(false);
+		CurrentCharacter->SwapAttack();
+
+		CurrentCharacter->OnSwapAttackEnded.AddLambda([this, CurrentCharacter]()
+			{
+				DisableCharacter(CurrentCharacter);
+				CurrentCharacter->OnSwapAttackEnded.Clear();
+			});
+
+		SwapGaugeComp->ConsumeGauge();
+	}
+	else
+	{
+		// Disable Current Character
+		DisableCharacter(CurrentCharacter);
+	}
+
+}
+
+void APartyManager::TransferTransform(int32 SlotIndex)
+{
+	ABaseCharacter* CurrentCharacter = SpawnedPartyMembers[ActiveIndex];
+	if (!CurrentCharacter)
+	{
+		return;
+	}
+
+	ABaseCharacter* NewCharacter = SpawnedPartyMembers[SlotIndex];
+	if (!NewCharacter)
+	{
+		return;
+	}
+
+	NewCharacter->SetActorLocation(CurrentCharacter->GetActorLocation());
+	NewCharacter->SetActorRotation(CurrentCharacter->GetActorRotation());
+}
+
+void APartyManager::PossesCharacter(int32 SlotIndex)
+{
+	ABaseCharacter* NewCharacter = SpawnedPartyMembers[SlotIndex];
+	if (!NewCharacter)
+	{
+		return;
+	}
+
+	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
+	if (!PlayerController)
+	{
+		return;
+	}
+
+	// Enable New Character
+	EnableCharacter(NewCharacter);
+
+	FRotator CameraRotation = FRotator::ZeroRotator;
+	CameraRotation = PlayerController->GetControlRotation();
+
+	NewCharacter->SetCameraBoomPawnControlRotation(false);
+	PlayerController->Possess(NewCharacter);
+	PlayerController->SetControlRotation(CameraRotation);
+	NewCharacter->SetCameraBoomPawnControlRotation(true);
+	NewCharacter->StartAttackTimer();
+	ActiveIndex = SlotIndex;
+
+
+	// Broadcast player swap event
+	OnPlayerSwapped.Broadcast(Cast<APawn>(NewCharacter));
 }
