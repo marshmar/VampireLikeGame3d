@@ -57,4 +57,7 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
 	float Health;	
+
+	UPROPERTY(VisibleAnywhere)
+	USceneComponent* HomingTargetPoint;
 };

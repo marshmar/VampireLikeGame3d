@@ -13,6 +13,18 @@ class UBaseCharacterAnimInstance;
 
 DECLARE_MULTICAST_DELEGATE(FOnSwapAttackEnded);
 
+USTRUCT()
+struct FTargetingTransform
+{
+	GENERATED_BODY()
+
+	FVector StartLocation = FVector::ZeroVector;
+	FVector EndLocation = FVector::ZeroVector;
+	FRotator Rotation = FRotator::ZeroRotator;
+	FVector Direction = FVector::ForwardVector;
+};
+
+
 UCLASS(Abstract)
 class VAMPIRELIKE3D_API ABaseCharacter : public ACharacter
 {
@@ -36,6 +48,11 @@ public:
 	virtual void SwapAttack();
 	virtual void OnSwapAttackEffect(const FName& EffectName);
 	virtual void OnSwapAttackHit();
+	virtual void OnSwapAttackMove();
+
+	bool IsSwapAttacking() const;
+	void SetSwapAttacking(bool State);
+	void RotateTo(FVector& Direction);
 
 protected:
 	UPROPERTY(VisibleAnywhere)
@@ -76,9 +93,14 @@ protected:
 	void SwapCharacter();
 	virtual void BasicAttack();
 	virtual AActor* FindNearestEnemy(float Distance);
-
+	virtual void SpawnEffectAtLocation(UParticleSystem* Effect, const FVector& SpawnLocation, const FRotator& SpawnRotation);
+	virtual FTargetingTransform GetTargetingTransform(AActor* Target, const FName& SocketName) const;
 	/*
 	* Play montage functions
 	*/
 	void PlayMontage(const FName& SectionName, UAnimMontage* AnimMontage);
+
+private:
+	UPROPERTY(VisibleAnywhere)
+	bool SwapAttacking;
 };

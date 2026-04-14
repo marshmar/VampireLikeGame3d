@@ -29,17 +29,23 @@ public:
 	* Animation Notifty
 	*/
 	UFUNCTION()
-	void AnimNotify_SwapAttackEnd();
+	virtual void AnimNotify_SwapAttackStart();
 
 	UFUNCTION()
-	void AnimNotify_SwapAttackEffectStart();
+	virtual void AnimNotify_SwapAttackEnd();
 
 	UFUNCTION()
-	void AnimNotify_SwapAttackEffectHit();
+	virtual void AnimNotify_SwapAttackEffectStart();
 
 	UFUNCTION()
-	void AnimNotify_SwapAttackEffectEnd();
+	virtual void AnimNotify_SwapAttackEffectHit();
 
 	UFUNCTION()
-	void AnimNotify_SwapAttackHit();
+	virtual void AnimNotify_SwapAttackEffectEnd();
+
+	UFUNCTION()
+	virtual void AnimNotify_SwapAttackHit();
+
+	UFUNCTION()
+	virtual void AnimNotify_SwapAttackMove();
 };

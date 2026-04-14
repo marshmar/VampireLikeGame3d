@@ -67,6 +67,16 @@ void UCharacterAttributeComponent::SetAttackSpeed(float Value)
 	this->AttackSpeed = Value;
 }
 
+float UCharacterAttributeComponent::GetAttackRange() const
+{
+	return this->AttackRange;
+}
+
+void UCharacterAttributeComponent::SetAttackRange(float Value)
+{
+	this->AttackRange = Value;
+}
+
 float UCharacterAttributeComponent::GetCriticalChance() const
 {
 	return this->CriticalChance;

@@ -6,8 +6,10 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Systems/Party/PartyManager.h"
 #include "Kismet/GameplayStatics.h"
-
+#include "Utils/CollisionDefinitions.h"
 //#include "Kismet/KismetSystemLibrary.h"
+
+
 ABaseEnemy::ABaseEnemy()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -17,35 +19,34 @@ ABaseEnemy::ABaseEnemy()
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 	GetMesh()->SetGenerateOverlapEvents(true);
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+	GetCapsuleComponent()->SetCollisionObjectType(ECC_Enemy);
 
 	AIControllerClass = AEnemyAIController::StaticClass();
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
-	// Set up Attribute Component
+	// Setup AttributeComponent
 	AttributeComp = CreateDefaultSubobject<UAttributeComponent>(TEXT("AttributeComponent"));
-	if (AttributeComp)
-	{
-		AttributeComp->SetMoveSpeed(75.0f);
+	AttributeComp->SetMoveSpeed(75.0f);
 
-		// Set MoveSpeed
-		GetCharacterMovement()->MaxWalkSpeed = AttributeComp->GetMoveSpeed();
-	}
+	// Set MoveSpeed
+	GetCharacterMovement()->MaxWalkSpeed = AttributeComp->GetMoveSpeed();
 
-
+	// Setup HomingTargetComponent
+	// NOTE: The component name must be named EXACTLY as 'HomingTargetPoint' to success for homing
+	HomingTargetPoint = CreateDefaultSubobject<USceneComponent>(TEXT("HomingTargetPoint"));
+	HomingTargetPoint->SetupAttachment(RootComponent);
+	HomingTargetPoint->SetRelativeLocation(FVector(0.f, 0.f, 50.f));
 }
 
 void ABaseEnemy::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	if (AttributeComp)
-	{
-		AttributeComp->SetMaxHP(100.f);
-		AttributeComp->SetCurHP(AttributeComp->GetMaxHP());
-	}
+	AttributeComp->SetMaxHP(100.f);
+	AttributeComp->SetCurHP(AttributeComp->GetMaxHP());
 
 	APartyManager* PartyManager = Cast<APartyManager>(UGameplayStatics::GetActorOfClass(GetWorld(), APartyManager::StaticClass()));
-	if (PartyManager)
+	if (IsValid(PartyManager))
 	{
 		PartyManager->OnPlayerSwapped.AddUObject(this, &ABaseEnemy::UpdateTarget);
 	}
@@ -54,11 +55,12 @@ void ABaseEnemy::BeginPlay()
 void ABaseEnemy::PlayMontage(const FName& SectionName, UAnimMontage* AnimMontage)
 {
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	if (AnimInstance && AnimMontage)
+	if (AnimInstance == nullptr || AnimMontage == nullptr)
 	{
-		AnimInstance->Montage_Play(AnimMontage);
-		AnimInstance->Montage_JumpToSection(SectionName, AnimMontage);
+		return;
 	}
+	AnimInstance->Montage_Play(AnimMontage);
+	AnimInstance->Montage_JumpToSection(SectionName, AnimMontage);
 }
 
 
@@ -89,11 +91,6 @@ void ABaseEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 
 void ABaseEnemy::GetHit(const FVector& ImpactPoint)
 {
-	if (!AttributeComp)
-	{
-		return;
-	}
-
 	if (AttributeComp->IsAlive())
 	{
 		DirectionalHitReact(ImpactPoint);
@@ -102,7 +99,6 @@ void ABaseEnemy::GetHit(const FVector& ImpactPoint)
 	{
 		Die(ImpactPoint);
 	}
-
 }
 
 float ABaseEnemy::CalculateHitDegree(const FVector& ImpactPoint)
@@ -165,24 +161,24 @@ void ABaseEnemy::DirectionalHitReact(const FVector& ImpactPoint)
 
 void ABaseEnemy::UpdateTarget(APawn* NewCharacter)
 {
-	if (NewCharacter)
+	if (NewCharacter == nullptr)
 	{
-		AEnemyAIController* AIController = Cast<AEnemyAIController>(GetController());
-		if (AIController)
-		{
-			AIController->UpdateTarget(NewCharacter);
-		}
+		return;
 	}
+
+	AEnemyAIController* AIController = Cast<AEnemyAIController>(GetController());
+	if (!IsValid(AIController))
+	{
+		return;
+	}
+
+	AIController->UpdateTarget(NewCharacter);
 }
 
 float ABaseEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	// TODO: AttributeComp에서 데미지 깎기 전에 버프/디버프 같은 효과 적용 필요
-	if (AttributeComp)
-	{
-		AttributeComp->ReceiveDamage(DamageAmount);
-	}
-
+	AttributeComp->ReceiveDamage(DamageAmount);
 	return 0.0f;
 }
 

@@ -59,27 +59,41 @@ void APartyManager::AddPartyMember(TSubclassOf<ABaseCharacter> Character)
 
 void APartyManager::SwapCharacter(int32 SlotIndex)
 {
-	if (!IsValidSwap(SlotIndex))
-	{
-		return;
-	}
-
-	if (ActiveIndex != SlotIndex)
-	{
-		HandlePreviousCharacter(SlotIndex);
-		TransferTransform(SlotIndex);
-		PossesCharacter(SlotIndex);
-	}
+	HandlePreviousCharacter(SlotIndex);
+	TransferTransform(SlotIndex);
+	PossesCharacter(SlotIndex);
 }
 
 void APartyManager::SwapCharacterToNext()
 {
-	SwapCharacter((ActiveIndex + 1) % SpawnedPartyMembers.Num());	
+	int32 StartIndex = ActiveIndex;
+	int32 NextIndex = (ActiveIndex + 1) % SpawnedPartyMembers.Num();
+
+	while (!IsValidSwap(NextIndex))
+	{
+		NextIndex = (NextIndex + 1) % SpawnedPartyMembers.Num();
+		if (NextIndex == StartIndex)
+		{
+			return;
+		}
+	}
+	SwapCharacter(NextIndex);
 }
 
-void APartyManager::SwapCharacterToBef()
+void APartyManager::SwapCharacterToPrev()
 {
-	SwapCharacter(((ActiveIndex - 1) + SpawnedPartyMembers.Num()) % SpawnedPartyMembers.Num());
+	int32 StartIndex = ActiveIndex;
+	int32 PrevIndex = ((ActiveIndex - 1) + SpawnedPartyMembers.Num()) % SpawnedPartyMembers.Num();
+
+	while (!IsValidSwap(PrevIndex))
+	{
+		PrevIndex = ((PrevIndex - 1) + SpawnedPartyMembers.Num()) % SpawnedPartyMembers.Num();
+		if (PrevIndex == StartIndex)
+		{
+			return;
+		}
+	}
+	SwapCharacter(PrevIndex);
 }
 
 ABaseCharacter* APartyManager::GetCurrentCharacter()
@@ -104,6 +118,21 @@ void APartyManager::EnableCharacter(ABaseCharacter* Character)
 bool APartyManager::IsValidSwap(int32 SlotIndex)
 {
 	if (!SpawnedPartyMembers.IsValidIndex(SlotIndex))
+	{
+		return false;
+	}
+
+	if (!SpawnedPartyMembers[SlotIndex])
+	{
+		return false;
+	}
+
+	if (ActiveIndex == SlotIndex)
+	{
+		return false;
+	}
+
+	if (SpawnedPartyMembers[SlotIndex]->IsSwapAttacking())
 	{
 		return false;
 	}
@@ -153,11 +182,7 @@ void APartyManager::TransferTransform(int32 SlotIndex)
 		return;
 	}
 
-	ABaseCharacter* NewCharacter = SpawnedPartyMembers[SlotIndex];
-	if (!NewCharacter)
-	{
-		return;
-	}
+	ABaseCharacter* NewCharacter = SpawnedPartyMembers[SlotIndex]; // NewCharacter is guaranteed non-null here, as IsValidSwap already performs the null check.
 
 	NewCharacter->SetActorLocation(CurrentCharacter->GetActorLocation());
 	NewCharacter->SetActorRotation(CurrentCharacter->GetActorRotation());

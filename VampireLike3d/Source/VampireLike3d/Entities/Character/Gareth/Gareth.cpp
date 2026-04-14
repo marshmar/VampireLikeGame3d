@@ -1,10 +1,21 @@
 #include "Gareth.h"
 #include "Kismet/GameplayStatics.h"
+#include "Entities/Character/CharacterAttributeComponent.h"
+#include "Interfaces/HitInterface.h"
+AGareth::AGareth()
+{
+	AttributeComp->SetAttackSpeed(1.0f);
+	AttributeComp->SetAttackRange(1000.0f);
+}
 
 void AGareth::BasicAttack()
 {
-	AActor* NearestEnemy = FindNearestEnemy(1000.f);
-	if (!NearestEnemy) return;
+	const float AttackRange = 300.0f;
+	AActor* NearestEnemy = FindNearestEnemy(AttackRange);
+	if (!IsValid(NearestEnemy))
+	{
+		return;
+	}
 
 	PlayMontage(FName("BasicAttack"), BasicAttackMontage);
 }
@@ -18,12 +29,14 @@ void AGareth::OnSwapAttackEffect(const FName& EffectName)
 {
 	if (SwapAttackEffects.IsEmpty())
 	{
+		UE_LOG(LogTemp, Warning, TEXT("%s's SwapAttackEffects is not set"), *GetName())
 		return;
 	}
 
 	UParticleSystem** Effect = SwapAttackEffects.Find(EffectName);
-	if (!Effect)
+	if (Effect == nullptr)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("%s cannot find SwapAttackEffect"), *GetName())
 		return;
 	}
 
@@ -38,12 +51,49 @@ void AGareth::OnSwapAttackHit()
 {
 	TArray<FHitResult> HitResults;
 	FVector Center = GetActorLocation();
-	float Radius = 1000.0f; // 이 값을 기준으로 이펙트 크기 맞추기
+	const float HitRange = 1000.0f; 
+	const float Damge = 60.0f;
 
 	UKismetSystemLibrary::SphereTraceMulti(
-		GetWorld(), Center, Center, Radius,
+		GetWorld(), Center, Center, HitRange,
 		UEngineTypes::ConvertToTraceType(ECC_Pawn),
 		false, TArray<AActor*>(),
-		EDrawDebugTrace::ForDuration, // 디버그로 범위 시각화
+		EDrawDebugTrace::None, // EDrawDebugTrace::ForDuration
 		HitResults, true);
+
+
+	for (FHitResult& HitResult : HitResults)
+	{
+		AActor* HitActor = HitResult.GetActor();
+		if (!IsValid(HitActor))
+		{
+			continue;
+		}
+
+		UGameplayStatics::ApplyDamage(
+			HitActor,
+			Damge,
+			GetController(),
+			this,
+			UDamageType::StaticClass()
+		);
+
+		IHitInterface* HitInterface = Cast<IHitInterface>(HitActor);
+		if (HitInterface == nullptr)
+		{
+			continue;
+		}
+		HitInterface->GetHit(HitResult.ImpactPoint);
+	}
+}
+
+void AGareth::OnSwapAttackMove()
+{
+	const float AttackRange = 3000.0f;
+	AActor* NearestEnemy = FindNearestEnemy(AttackRange);
+	if (!IsValid(NearestEnemy))
+	{
+		return;
+	}
+	SetActorLocation(NearestEnemy->GetActorLocation());
 }

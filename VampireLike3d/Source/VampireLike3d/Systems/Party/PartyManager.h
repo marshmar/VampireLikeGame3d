@@ -28,7 +28,7 @@ public:
 
 	void SwapCharacter(int32 SlotIndex);
 	void SwapCharacterToNext();
-	void SwapCharacterToBef();
+	void SwapCharacterToPrev();
 
 
 	ABaseCharacter* GetCurrentCharacter();

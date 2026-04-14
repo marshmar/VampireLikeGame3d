@@ -10,11 +10,12 @@ class VAMPIRELIKE3D_API AGareth : public ABaseCharacter
 	GENERATED_BODY()
 	
 public:
+	AGareth();
 
 	virtual void SwapAttack() override;
 	virtual void OnSwapAttackEffect(const FName& EffectName) override;
 	virtual void OnSwapAttackHit() override;
-
+	virtual void OnSwapAttackMove() override;
 protected:
 	virtual void BasicAttack() override;
 };

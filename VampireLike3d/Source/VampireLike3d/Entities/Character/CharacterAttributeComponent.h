@@ -42,10 +42,14 @@ private:
 	float AttackSpeed;
 
 	UPROPERTY(VisibleAnywhere, Category = "Attributes")
+	float AttackRange;
+
+	UPROPERTY(VisibleAnywhere, Category = "Attributes")
 	float CriticalChance;
 
 	UPROPERTY(VisibleAnywhere, Category = "Attributes")
 	float CriticalDamage;
+
 
 	/*
 	* Utils
@@ -98,6 +102,8 @@ public:
 	float GetAttackSpeed() const;
 	void SetAttackSpeed(float Value);
 	float GetCriticalChance() const;
+	float GetAttackRange() const;
+	void SetAttackRange(float Value);
 	void SetCriticalChance(float Value);
 	float GetCriticalDamage() const;
 	void SetCriticalDamage(float Value);

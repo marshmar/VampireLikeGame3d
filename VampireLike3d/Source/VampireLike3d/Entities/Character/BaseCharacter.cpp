@@ -8,6 +8,7 @@
 #include "CharacterAttributeComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "BaseCharacterAnimInstance.h"
+#include "Particles/ParticleSystemComponent.h"
 
 ABaseCharacter::ABaseCharacter()
 {
@@ -20,18 +21,21 @@ ABaseCharacter::ABaseCharacter()
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	GetCharacterMovement()->RotationRate = FRotator(0.f, 400.f, 0.f);
 
+	// Setup SpringArmComponent
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(GetRootComponent());
 	CameraBoom->TargetArmLength = 600.0f;
 	CameraBoom->SetRelativeLocation(FVector(0, 0, 300.f));
 	CameraBoom->bUsePawnControlRotation = true;
 
+	// Setup CameraComponent
 	ViewCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("ViewCamera"));
 	ViewCamera->SetupAttachment(CameraBoom);
 	ViewCamera->bUsePawnControlRotation = false;
 	ViewCamera->SetRelativeLocation(FVector(-200.f, 0.f, 0.f));
 	ViewCamera->SetRelativeRotation(FRotator(-20.f, 0.f, 0.f));
-	// Set up Attribute Component
+
+	// Setup Attribute Component
 	AttributeComp = CreateDefaultSubobject<UCharacterAttributeComponent>(TEXT("CharacterAttributeComponent"));
 
 }
@@ -39,9 +43,12 @@ ABaseCharacter::ABaseCharacter()
 void ABaseCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	PartyManager = Cast<APartyManager>(
-		UGameplayStatics::GetActorOfClass(GetWorld(), APartyManager::StaticClass()));
+
+	PartyManager = Cast<APartyManager>(UGameplayStatics::GetActorOfClass(GetWorld(), APartyManager::StaticClass()));
+	if (!IsValid(PartyManager))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s's PartyManager failed to assign"), *GetName())
+	}
 }
 
 void ABaseCharacter::Tick(float DeltaTime)
@@ -61,28 +68,32 @@ void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 void ABaseCharacter::MoveForward(float Value)
 {
-	if (Controller && (Value != 0.f))
+	if (Controller == nullptr || Value == 0.f)
 	{
-		// find out which way is forward
-		const FRotator ControlRotation = GetControlRotation();
-		const FRotator YawRotation(0.f, ControlRotation.Yaw, 0.f);
-
-		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-		AddMovementInput(Direction, Value);
+		return;
 	}
+
+	// find out which way is forward
+	const FRotator ControlRotation = GetControlRotation();
+	const FRotator YawRotation(0.f, ControlRotation.Yaw, 0.f);
+
+	const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+	AddMovementInput(Direction, Value);
 }
 
 void ABaseCharacter::MoveRight(float Value)
 {
-	if (Controller && (Value != 0.f))
+	if (Controller == nullptr || Value == 0.f)
 	{
-		// find out which way is right
-		const FRotator ControlRotation = GetControlRotation();
-		const FRotator YawRotation(0.f, ControlRotation.Yaw, 0.f);
-
-		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-		AddMovementInput(Direction, Value);
+		return;
 	}
+
+	// find out which way is right
+	const FRotator ControlRotation = GetControlRotation();
+	const FRotator YawRotation(0.f, ControlRotation.Yaw, 0.f);
+
+	const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+	AddMovementInput(Direction, Value);
 }
 
 void ABaseCharacter::Turn(float Value)
@@ -92,12 +103,12 @@ void ABaseCharacter::Turn(float Value)
 
 void ABaseCharacter::SwapCharacter()
 {
-	if (PartyManager)
+	if (!IsValid(PartyManager))
 	{
-		PartyManager->SwapCharacterToNext();
-		UE_LOG(LogTemp, Warning, TEXT("Swap to next Character"));
+		return;
 	}
 
+	PartyManager->SwapCharacterToNext();
 	StopAttackTimer();
 }
 
@@ -105,29 +116,50 @@ void ABaseCharacter::BasicAttack(){ }
 void ABaseCharacter::SwapAttack(){ }
 void ABaseCharacter::OnSwapAttackEffect(const FName& EffectName){ }
 void ABaseCharacter::OnSwapAttackHit(){ }
+void ABaseCharacter::OnSwapAttackMove(){ }
+
+bool ABaseCharacter::IsSwapAttacking() const
+{
+	return SwapAttacking == true;
+}
+
+void ABaseCharacter::SetSwapAttacking(bool State)
+{
+	SwapAttacking = State;
+}
+
+/// Rotates the character to the specified direction while keeping the camera in place.
+void ABaseCharacter::RotateTo(FVector& Direction)
+{
+	FRotator CameraWorldRotation = CameraBoom->GetComponentRotation();
+	SetActorRotation(FRotator(0.f, Direction.Rotation().Yaw, 0.f));
+	CameraBoom->SetWorldRotation(CameraWorldRotation);
+}
 
 void ABaseCharacter::PlayMontage(const FName& SectionName, UAnimMontage* AnimMontage)
 {
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	if (AnimInstance && AnimMontage)
+	if (AnimInstance == nullptr || AnimMontage == nullptr)
 	{
-		AnimInstance->Montage_Play(AnimMontage);
-		AnimInstance->Montage_JumpToSection(SectionName, AnimMontage);
+		return;
 	}
+
+	AnimInstance->Montage_Play(AnimMontage);
+	AnimInstance->Montage_JumpToSection(SectionName, AnimMontage);
 }
 
 AActor* ABaseCharacter::FindNearestEnemy(float Distance)
 {
 	TArray<FOverlapResult> Overlaps;
-	FCollisionShape CollisionShape = FCollisionShape::MakeSphere(Distance);	// 각 캐릭터별 공격 사거리로 변경 필요.
+	FCollisionShape CollisionShape = FCollisionShape::MakeSphere(Distance);
 
 	FCollisionQueryParams QueryParams;
 	QueryParams.AddIgnoredActor(this);
 
-	const FVector CharLocation = GetActorLocation();
+	const FVector CharacterLocation = GetActorLocation();
 	GetWorld()->OverlapMultiByChannel(
 		Overlaps,
-		CharLocation,
+		CharacterLocation,
 		FQuat::Identity,
 		ECC_Pawn,
 		CollisionShape,
@@ -140,12 +172,12 @@ AActor* ABaseCharacter::FindNearestEnemy(float Distance)
 	for (FOverlapResult& Overlap : Overlaps)
 	{
 		AActor* Enemy = Cast<ABaseEnemy>(Overlap.GetActor());
-		if (!Enemy)
+		if (!IsValid(Enemy))
 		{
 			continue;
 		}
 
-		float Distance = FVector::Dist(CharLocation, Enemy->GetActorLocation());
+		float Distance = FVector::Dist(CharacterLocation, Enemy->GetActorLocation());
 		if (Distance < MinDistance)
 		{
 			MinDistance = Distance;
@@ -156,13 +188,46 @@ AActor* ABaseCharacter::FindNearestEnemy(float Distance)
 	return NearestEnemy;
 }
 
+void ABaseCharacter::SpawnEffectAtLocation(UParticleSystem* Effect, const FVector& SpawnLocation, const FRotator& SpawnRotation)
+{
+	if (Effect == nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s's %s is not set"), *GetName(), *Effect->GetName())
+		return;
+	}
+
+	UGameplayStatics::SpawnEmitterAtLocation(
+		GetWorld(),
+		Effect,
+		SpawnLocation,
+		SpawnRotation
+	);
+}
+
+FTargetingTransform ABaseCharacter::GetTargetingTransform(AActor* Target, const FName& SocketName) const
+{
+	FTargetingTransform OutData;
+
+	// Get the Socket location from the Mesh
+	OutData.StartLocation = GetMesh()->GetSocketLocation(SocketName);
+
+	// Get Target Location
+	OutData.EndLocation = Target->GetActorLocation();
+
+	// Calculate Direction and Rotaion
+	OutData.Direction = (OutData.EndLocation - OutData.StartLocation).GetSafeNormal();
+	OutData.Rotation = OutData.Direction.Rotation();
+
+	return OutData;
+}
+
 void ABaseCharacter::StartAttackTimer()
 {
 	GetWorldTimerManager().SetTimer(
 		BasicAttackTimerHandle,
 		this,
 		&ABaseCharacter::BasicAttack,
-		3.0f,
+		AttributeComp->GetAttackSpeed(),
 		true
 	);
 }
@@ -174,7 +239,7 @@ void ABaseCharacter::StopAttackTimer()
 
 void ABaseCharacter::SetCameraBoomPawnControlRotation(bool State)
 {
-	if (!CameraBoom)
+	if (CameraBoom == nullptr)
 	{
 		return;
 	}

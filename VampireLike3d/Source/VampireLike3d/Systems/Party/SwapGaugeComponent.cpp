@@ -1,11 +1,5 @@
 #include "Systems/Party/SwapGaugeComponent.h"
 
-/*
-* 스왑 게이지 컴포넌트
-* 캐릭터 교대 시 스왑 게이지 소모 x
-* 스왑 게이지가 일정량 있을 경우 스왑게이지 소모하여 캐릭터 교대
-* 스왑 게이지는 1초마다 1정도 차오름, 적을 처치할 시에 마찬가지로 차오름
-*/
 USwapGaugeComponent::USwapGaugeComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
@@ -16,7 +10,7 @@ void USwapGaugeComponent::BeginPlay()
 	Super::BeginPlay();	
 
 	MaxGauge = 100.f;
-	CurGauge = 60.f;
+	CurGauge = 90.f;
 	SwapAttackCost = 30.f;
 	ChargeInterval = 1.f;
 	ChargeAmountPerTick = 1.f;

@@ -82,3 +82,19 @@ VampireLike3d/Build/
 
 #Ignore thirdpary files
 VampireLike3d/Content/ThirdParty/
+VampireLike3d/Content/Assets/
+
+# Unreal Engine Temporary Files
+*.rsp
+*.obj
+*.pch
+*.g.cpp
+*.g.h
+*.generated.cpp
+*.generated.h
+
+# Rider & IDE Files
+.idea/
+*.sln
+*.vcxproj
+*.filters

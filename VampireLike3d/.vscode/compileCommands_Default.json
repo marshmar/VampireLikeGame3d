@@ -1,0 +1,354 @@
+[
+	{
+		"file": "D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\Source\\VampireLike3d\\Combat\\Projectile.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.34.31933\\bin\\Hostx64\\x64\\cl.exe",
+			"@D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\.vscode\\compileCommands_Default\\VampireLike3d.1.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.3\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\Source\\VampireLike3d\\Combat\\Projectile.h",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.34.31933\\bin\\Hostx64\\x64\\cl.exe",
+			"@D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\.vscode\\compileCommands_Default\\VampireLike3d.1.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.3\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\Source\\VampireLike3d\\Cores\\GameModeBase\\MyGameModeBase.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.34.31933\\bin\\Hostx64\\x64\\cl.exe",
+			"@D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\.vscode\\compileCommands_Default\\VampireLike3d.1.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.3\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\Source\\VampireLike3d\\Cores\\GameModeBase\\MyGameModeBase.h",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.34.31933\\bin\\Hostx64\\x64\\cl.exe",
+			"@D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\.vscode\\compileCommands_Default\\VampireLike3d.1.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.3\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\Source\\VampireLike3d\\Entities\\AttributeComponent.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.34.31933\\bin\\Hostx64\\x64\\cl.exe",
+			"@D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\.vscode\\compileCommands_Default\\VampireLike3d.1.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.3\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\Source\\VampireLike3d\\Entities\\AttributeComponent.h",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.34.31933\\bin\\Hostx64\\x64\\cl.exe",
+			"@D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\.vscode\\compileCommands_Default\\VampireLike3d.1.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.3\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\Source\\VampireLike3d\\Entities\\Character\\AutoTargetingNotifyState.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.34.31933\\bin\\Hostx64\\x64\\cl.exe",
+			"@D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\.vscode\\compileCommands_Default\\VampireLike3d.1.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.3\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\Source\\VampireLike3d\\Entities\\Character\\AutoTargetingNotifyState.h",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.34.31933\\bin\\Hostx64\\x64\\cl.exe",
+			"@D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\.vscode\\compileCommands_Default\\VampireLike3d.1.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.3\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\Source\\VampireLike3d\\Entities\\Character\\BaseCharacter.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.34.31933\\bin\\Hostx64\\x64\\cl.exe",
+			"@D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\.vscode\\compileCommands_Default\\VampireLike3d.1.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.3\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\Source\\VampireLike3d\\Entities\\Character\\BaseCharacter.h",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.34.31933\\bin\\Hostx64\\x64\\cl.exe",
+			"@D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\.vscode\\compileCommands_Default\\VampireLike3d.1.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.3\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\Source\\VampireLike3d\\Entities\\Character\\BaseCharacterAnimInstance.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.34.31933\\bin\\Hostx64\\x64\\cl.exe",
+			"@D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\.vscode\\compileCommands_Default\\VampireLike3d.1.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.3\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\Source\\VampireLike3d\\Entities\\Character\\BaseCharacterAnimInstance.h",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.34.31933\\bin\\Hostx64\\x64\\cl.exe",
+			"@D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\.vscode\\compileCommands_Default\\VampireLike3d.1.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.3\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\Source\\VampireLike3d\\Entities\\Character\\CharacterAttributeComponent.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.34.31933\\bin\\Hostx64\\x64\\cl.exe",
+			"@D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\.vscode\\compileCommands_Default\\VampireLike3d.1.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.3\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\Source\\VampireLike3d\\Entities\\Character\\CharacterAttributeComponent.h",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.34.31933\\bin\\Hostx64\\x64\\cl.exe",
+			"@D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\.vscode\\compileCommands_Default\\VampireLike3d.1.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.3\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\Source\\VampireLike3d\\Entities\\Character\\CharacterTypes.h",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.34.31933\\bin\\Hostx64\\x64\\cl.exe",
+			"@D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\.vscode\\compileCommands_Default\\VampireLike3d.1.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.3\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\Source\\VampireLike3d\\Entities\\Character\\Gareth\\Gareth.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.34.31933\\bin\\Hostx64\\x64\\cl.exe",
+			"@D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\.vscode\\compileCommands_Default\\VampireLike3d.1.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.3\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\Source\\VampireLike3d\\Entities\\Character\\Gareth\\Gareth.h",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.34.31933\\bin\\Hostx64\\x64\\cl.exe",
+			"@D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\.vscode\\compileCommands_Default\\VampireLike3d.1.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.3\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\Source\\VampireLike3d\\Entities\\Character\\Gareth\\GarethAnimInstance.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.34.31933\\bin\\Hostx64\\x64\\cl.exe",
+			"@D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\.vscode\\compileCommands_Default\\VampireLike3d.1.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.3\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\Source\\VampireLike3d\\Entities\\Character\\Gareth\\GarethAnimInstance.h",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.34.31933\\bin\\Hostx64\\x64\\cl.exe",
+			"@D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\.vscode\\compileCommands_Default\\VampireLike3d.1.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.3\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\Source\\VampireLike3d\\Entities\\Character\\MainCharacter.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.34.31933\\bin\\Hostx64\\x64\\cl.exe",
+			"@D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\.vscode\\compileCommands_Default\\VampireLike3d.1.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.3\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\Source\\VampireLike3d\\Entities\\Character\\MainCharacter.h",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.34.31933\\bin\\Hostx64\\x64\\cl.exe",
+			"@D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\.vscode\\compileCommands_Default\\VampireLike3d.1.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.3\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\Source\\VampireLike3d\\Entities\\Character\\Nullex\\Nullex.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.34.31933\\bin\\Hostx64\\x64\\cl.exe",
+			"@D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\.vscode\\compileCommands_Default\\VampireLike3d.1.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.3\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\Source\\VampireLike3d\\Entities\\Character\\Nullex\\Nullex.h",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.34.31933\\bin\\Hostx64\\x64\\cl.exe",
+			"@D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\.vscode\\compileCommands_Default\\VampireLike3d.1.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.3\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\Source\\VampireLike3d\\Entities\\Character\\Revenant\\Revenant.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.34.31933\\bin\\Hostx64\\x64\\cl.exe",
+			"@D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\.vscode\\compileCommands_Default\\VampireLike3d.1.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.3\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\Source\\VampireLike3d\\Entities\\Character\\Revenant\\Revenant.h",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.34.31933\\bin\\Hostx64\\x64\\cl.exe",
+			"@D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\.vscode\\compileCommands_Default\\VampireLike3d.1.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.3\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\Source\\VampireLike3d\\Entities\\Character\\Revenant\\RevenantAnimInstance.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.34.31933\\bin\\Hostx64\\x64\\cl.exe",
+			"@D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\.vscode\\compileCommands_Default\\VampireLike3d.1.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.3\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\Source\\VampireLike3d\\Entities\\Character\\Revenant\\RevenantAnimInstance.h",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.34.31933\\bin\\Hostx64\\x64\\cl.exe",
+			"@D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\.vscode\\compileCommands_Default\\VampireLike3d.1.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.3\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\Source\\VampireLike3d\\Entities\\Character\\WarriorAnimInstance.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.34.31933\\bin\\Hostx64\\x64\\cl.exe",
+			"@D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\.vscode\\compileCommands_Default\\VampireLike3d.1.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.3\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\Source\\VampireLike3d\\Entities\\Character\\WarriorAnimInstance.h",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.34.31933\\bin\\Hostx64\\x64\\cl.exe",
+			"@D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\.vscode\\compileCommands_Default\\VampireLike3d.1.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.3\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\Source\\VampireLike3d\\Entities\\Enemies\\BaseEnemy.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.34.31933\\bin\\Hostx64\\x64\\cl.exe",
+			"@D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\.vscode\\compileCommands_Default\\VampireLike3d.1.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.3\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\Source\\VampireLike3d\\Entities\\Enemies\\BaseEnemy.h",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.34.31933\\bin\\Hostx64\\x64\\cl.exe",
+			"@D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\.vscode\\compileCommands_Default\\VampireLike3d.1.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.3\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\Source\\VampireLike3d\\Entities\\Enemies\\EnemyAIController.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.34.31933\\bin\\Hostx64\\x64\\cl.exe",
+			"@D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\.vscode\\compileCommands_Default\\VampireLike3d.1.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.3\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\Source\\VampireLike3d\\Entities\\Enemies\\EnemyAIController.h",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.34.31933\\bin\\Hostx64\\x64\\cl.exe",
+			"@D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\.vscode\\compileCommands_Default\\VampireLike3d.1.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.3\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\Source\\VampireLike3d\\Interfaces\\AutoTargetingInterface.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.34.31933\\bin\\Hostx64\\x64\\cl.exe",
+			"@D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\.vscode\\compileCommands_Default\\VampireLike3d.1.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.3\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\Source\\VampireLike3d\\Interfaces\\AutoTargetingInterface.h",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.34.31933\\bin\\Hostx64\\x64\\cl.exe",
+			"@D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\.vscode\\compileCommands_Default\\VampireLike3d.1.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.3\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\Source\\VampireLike3d\\Interfaces\\HitInterface.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.34.31933\\bin\\Hostx64\\x64\\cl.exe",
+			"@D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\.vscode\\compileCommands_Default\\VampireLike3d.1.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.3\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\Source\\VampireLike3d\\Interfaces\\HitInterface.h",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.34.31933\\bin\\Hostx64\\x64\\cl.exe",
+			"@D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\.vscode\\compileCommands_Default\\VampireLike3d.1.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.3\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\Source\\VampireLike3d\\Systems\\Party\\PartyManager.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.34.31933\\bin\\Hostx64\\x64\\cl.exe",
+			"@D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\.vscode\\compileCommands_Default\\VampireLike3d.1.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.3\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\Source\\VampireLike3d\\Systems\\Party\\PartyManager.h",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.34.31933\\bin\\Hostx64\\x64\\cl.exe",
+			"@D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\.vscode\\compileCommands_Default\\VampireLike3d.1.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.3\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\Source\\VampireLike3d\\Systems\\Party\\SwapGaugeComponent.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.34.31933\\bin\\Hostx64\\x64\\cl.exe",
+			"@D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\.vscode\\compileCommands_Default\\VampireLike3d.1.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.3\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\Source\\VampireLike3d\\Systems\\Party\\SwapGaugeComponent.h",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.34.31933\\bin\\Hostx64\\x64\\cl.exe",
+			"@D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\.vscode\\compileCommands_Default\\VampireLike3d.1.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.3\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\Source\\VampireLike3d\\VampireLike3d.Build.cs",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.34.31933\\bin\\Hostx64\\x64\\cl.exe",
+			"@D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\.vscode\\compileCommands_Default\\VampireLike3d.1.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.3\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\Source\\VampireLike3d\\VampireLike3d.cpp",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.34.31933\\bin\\Hostx64\\x64\\cl.exe",
+			"@D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\.vscode\\compileCommands_Default\\VampireLike3d.1.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.3\\Engine\\Source"
+	},
+	{
+		"file": "D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\Source\\VampireLike3d\\VampireLike3d.h",
+		"arguments": [
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.34.31933\\bin\\Hostx64\\x64\\cl.exe",
+			"@D:\\Git Proejct\\VampireLikeGame3d\\VampireLike3d\\.vscode\\compileCommands_Default\\VampireLike3d.1.rsp"
+		],
+		"directory": "C:\\Program Files\\Epic Games\\UE_5.3\\Engine\\Source"
+	}
+]
