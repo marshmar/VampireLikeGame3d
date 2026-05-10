@@ -4,6 +4,7 @@
 #include "Combat/Projectile/HomingProjectile.h"
 #include "Combat/Summon/GravityField.h"
 #include "Kismet/GameplayStatics.h"
+#include "Combat/Projectile/Projectile.h"
 ANullex::ANullex()
 {
 	AttributeComp->SetAttackRange(2000.f);
@@ -72,9 +73,10 @@ bool ANullex::SpawnBasicAttackProjectile(AActor* Target, const FVector& SpawnLoc
 		return false;
 	}
 
+	const FTransform SpawnTransform(SpawnRotation, SpawnLocation);
 	AHomingProjectile* HomingProjectile = GetWorld()->SpawnActorDeferred<AHomingProjectile>(
 		BasicAttackProjectile,
-		FTransform(SpawnRotation, SpawnLocation),
+		SpawnTransform,
 		this,
 		this
 	);
@@ -87,7 +89,7 @@ bool ANullex::SpawnBasicAttackProjectile(AActor* Target, const FVector& SpawnLoc
 
 	HomingProjectile->SetHomingTarget(Target);
 	HomingProjectile->SetDamage(AttributeComp->GetAtk());
-	UGameplayStatics::FinishSpawningActor(HomingProjectile, HomingProjectile->GetActorTransform());
 
+	HomingProjectile->FinishSpawning(SpawnTransform);
 	return true;
 }

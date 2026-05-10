@@ -7,7 +7,7 @@
 #include "MyGameModeBase.generated.h"
 
 class ABaseCharacter;
-
+class UUIManager;
 UCLASS()
 class VAMPIRELIKE3D_API AMyGameModeBase : public AGameModeBase
 {

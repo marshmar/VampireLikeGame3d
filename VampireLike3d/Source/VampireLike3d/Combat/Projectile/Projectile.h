@@ -2,7 +2,9 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Interfaces/Poolable.h"
 #include "Projectile.generated.h"
+
 
 class UProjectileMovementComponent;
 
@@ -17,13 +19,13 @@ public:
 
 	float GetDamage() const;
 	void SetDamage(float Value);
+
 protected:
 	UPROPERTY(VisibleAnywhere)
 	class UProjectileMovementComponent* ProjectileMovementComponent;
 
 	virtual void BeginPlay() override;
 	virtual void InitProjectileMoveComp();
-	
 private:
 	UPROPERTY(VisibleAnywhere)
 	float Damage;

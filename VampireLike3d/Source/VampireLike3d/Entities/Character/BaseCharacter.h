@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Systems/ObjectPool/PoolManagerSubsystem.h"
 #include "BaseCharacter.generated.h"
 
 

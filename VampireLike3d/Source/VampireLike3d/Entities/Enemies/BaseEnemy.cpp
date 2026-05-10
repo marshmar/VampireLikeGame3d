@@ -7,6 +7,7 @@
 #include "Systems/Party/PartyManager.h"
 #include "Kismet/GameplayStatics.h"
 #include "Utils/CollisionDefinitions.h"
+#include "Particles/ParticleSystem.h"
 //#include "Kismet/KismetSystemLibrary.h"
 
 
@@ -42,7 +43,8 @@ void ABaseEnemy::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	AttributeComp->SetMaxHP(100.f);
+	UE_LOG(LogTemp, Warning, TEXT("BeginPlay 호출"));
+	AttributeComp->SetMaxHP(20.f);
 	AttributeComp->SetCurHP(AttributeComp->GetMaxHP());
 
 	APartyManager* PartyManager = Cast<APartyManager>(UGameplayStatics::GetActorOfClass(GetWorld(), APartyManager::StaticClass()));
@@ -66,15 +68,34 @@ void ABaseEnemy::PlayMontage(const FName& SectionName, UAnimMontage* AnimMontage
 
 void ABaseEnemy::Die(const FVector& ImpactPoint)
 {
-	// TODO: Play Death Montage
+	// 사망 시 완전히 멈춤
+	GetCharacterMovement()->DisableMovement();
+	GetCharacterMovement()->StopMovementImmediately();
+
+	// AI 비활성화
+	AEnemyAIController* AIController = Cast<AEnemyAIController>(GetController());
+	if (AIController)
+	{
+		AIController->StopMovement();
+	}
+
 	const float Theta = CalculateHitDegree(ImpactPoint);
 	FName Section("DeathBack");
+	DeathPose = EDeathPose::EDP_DeathBack;
 	if (Theta >= -90.f && Theta < 90.f)
 	{
 		Section = FName("DeathForward");
 		DeathPose = EDeathPose::EDP_DeathForward;
 	}
 	PlayMontage(Section, DeathMontage);
+
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance)
+	{
+		// 중복 방지
+		AnimInstance->OnMontageEnded.RemoveDynamic(this, &ABaseEnemy::OnDeathMontageEnded);
+		AnimInstance->OnMontageEnded.AddDynamic(this, &ABaseEnemy::OnDeathMontageEnded);
+	}
 }
 
 
@@ -128,6 +149,23 @@ float ABaseEnemy::CalculateHitDegree(const FVector& ImpactPoint)
 
 void ABaseEnemy::DirectionalHitReact(const FVector& ImpactPoint)
 {
+	// 피격 시 잠깐 움직임 멈춤
+	GetCharacterMovement()->DisableMovement();
+
+	// 히트 리액션 몽타주 끝나면 움직임 재개
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && HitReactMontage)
+	{
+		float MontageDuration = AnimInstance->Montage_Play(HitReactMontage);
+		GetWorldTimerManager().SetTimer(
+			HitReactTimerHandle,
+			this,
+			&ABaseEnemy::OnHitReactEnded,
+			MontageDuration,
+			false
+		);
+	}
+
 	const float Theta = CalculateHitDegree(ImpactPoint);
 
 	// Hit Direction Guide
@@ -182,5 +220,87 @@ float ABaseEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent
 	return 0.0f;
 }
 
+void ABaseEnemy::OnDeathMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+{
+	if (Montage != DeathMontage) return;
+
+	// 이펙트 소환
+	if (DeathEffect)
+	{
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), DeathEffect, GetActorLocation());
+	}
+
+	if (OnEnemyDied.IsBound())
+	{
+		OnEnemyDied.Broadcast();
+	}
+
+	UPoolManagerSubsystem* PoolManager = GetGameInstance()->GetSubsystem<UPoolManagerSubsystem>();
+	if (PoolManager)
+	{
+		PoolManager->ReleaseActorByClass(this);
+	}
+
+
+}
+
+void ABaseEnemy::OnHitReactEnded()
+{
+	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
+}
+
+void ABaseEnemy::OnAcquired()
+{
+	// HP 초기화
+	AttributeComp->SetCurHP(AttributeComp->GetMaxHP());
+	DeathPose = EDeathPose::EDP_Alive;
+	UE_LOG(LogTemp, Warning, TEXT("MaxHP: %f, CurHP: %f"),
+		AttributeComp->GetMaxHP(), AttributeComp->GetCurHP());
+
+	// 스폰될 때 움직임 막기
+	GetCharacterMovement()->DisableMovement();
+
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance)
+	{
+		AnimInstance->OnMontageEnded.RemoveDynamic(this, &ABaseEnemy::OnDeathMontageEnded);
+		AnimInstance->OnMontageEnded.RemoveDynamic(this, &ABaseEnemy::OnSpawnMontageEnded);
+		AnimInstance->StopAllMontages(0.f);
+
+		// 스폰 몽타주 재생
+		if (SpawnMontage)
+		{
+			AnimInstance->OnMontageEnded.AddDynamic(this, &ABaseEnemy::OnSpawnMontageEnded);
+			FName Section = FName("Spawn");
+			PlayMontage(Section, SpawnMontage);
+		}
+	}
+}
+
+void ABaseEnemy::OnReleased()
+{
+	OnEnemyDied.Clear();
+
+	// 몽타주 콜백 해제
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance)
+	{
+		AnimInstance->OnMontageEnded.RemoveDynamic(this, &ABaseEnemy::OnDeathMontageEnded);
+	}
+}
+
+void ABaseEnemy::OnSpawnMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+{
+	if (Montage != SpawnMontage) return;
+
+	// 스폰 몽타주 끝나면 움직임 재개
+	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
+
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance)
+	{
+		AnimInstance->OnMontageEnded.RemoveDynamic(this, &ABaseEnemy::OnSpawnMontageEnded);
+	}
+}
 
 

@@ -3,14 +3,18 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Interfaces/HitInterface.h"
+#include "Interfaces/Poolable.h"
 #include "Entities/Character/CharacterTypes.h"
 #include "BaseEnemy.generated.h"
 
 class UAnimMontage;
 class UAttributeComponent;
 
+// BaseEnemy.h에 추가
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnEnemyDied);
+
 UCLASS()
-class VAMPIRELIKE3D_API ABaseEnemy : public ACharacter, public IHitInterface
+class VAMPIRELIKE3D_API ABaseEnemy : public ACharacter, public IHitInterface, public IPoolable
 {
 	GENERATED_BODY()
 
@@ -23,6 +27,12 @@ public:
 	virtual void GetHit(const FVector& ImpactPoint) override;
 	void DirectionalHitReact(const FVector& ImpactPoint);
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+
+	virtual void OnAcquired() override;
+	virtual void OnReleased() override;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnEnemyDied OnEnemyDied;
 
 protected:
 	UPROPERTY(BlueprintReadOnly)
@@ -60,4 +70,22 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 	USceneComponent* HomingTargetPoint;
+
+	UFUNCTION()
+	void OnDeathMontageEnded(UAnimMontage* Montage, bool bInterrupted);
+
+	FTimerHandle HitReactTimerHandle;
+
+	UFUNCTION()
+	void OnHitReactEnded();
+
+	// BaseEnemy.h 추가
+	UPROPERTY(EditDefaultsOnly, Category = "Effects")
+	UParticleSystem* DeathEffect;
+
+	UPROPERTY(EditDefaultsOnly, Category = Montages)
+	UAnimMontage* SpawnMontage;
+
+	UFUNCTION()
+	void OnSpawnMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 };

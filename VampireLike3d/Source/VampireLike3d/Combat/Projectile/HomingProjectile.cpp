@@ -5,6 +5,7 @@
 #include "Interfaces/HitInterface.h"
 #include "Kismet/GameplayStatics.h"
 #include "Utils/CollisionDefinitions.h"
+#include "Systems/ObjectPool/PoolManagerSubsystem.h"
 
 AHomingProjectile::AHomingProjectile()
 {
@@ -90,6 +91,8 @@ void AHomingProjectile::OnHit(const FHitResult& HitResult)
 		UDamageType::StaticClass()
 	);
 
+	Destroy();
+
 	if (HitParticle == nullptr)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("%s's HitParticle is not set"), *GetName())
@@ -103,6 +106,6 @@ void AHomingProjectile::OnHit(const FHitResult& HitResult)
 		GetActorRotation()
 	);
 
-	Destroy();
+
 }
 
