@@ -17,34 +17,38 @@ void ASpawnManager::BeginPlay()
 {
     Super::BeginPlay();
 
-    if (WaveTimer)
+    if (!IsValid(WaveTimer))
     {
-        UE_LOG(LogTemp, Warning, TEXT("WaveTimer 연결됨"));
-        WaveTimer->OnPhaseChanged.AddDynamic(this, &ASpawnManager::OnPhaseChanged);
-    }
-    else
-    {
-        UE_LOG(LogTemp, Warning, TEXT("WaveTimer 없음"));
+        UE_LOG(LogTemp, Error, TEXT("WaveTimer is nullptr"));
+        return;
     }
 
-    // 첫 페이즈 데이터 로드
-    if (WaveTimer && WaveTimer->PhaseDataTable)
+    // Load FirstPhase Data
+    if (!IsValid(PhaseDataTable))
     {
-        TArray<FPhaseData*> Rows;
-        WaveTimer->PhaseDataTable->GetAllRows<FPhaseData>(TEXT(""), Rows);
-        if (Rows.IsValidIndex(0))
-        {
-            CurrentPhaseData = *Rows[0];
-        }
+        UE_LOG(LogTemp, Error, TEXT("PhaseDataTable is nullptr"));
+        return;
     }
 
-    // 풀 초기화
+    PhaseDataTable->GetAllRows<FPhaseData>(TEXT(""), Rows);
+    if (Rows.IsValidIndex(0))
+    {
+        CurrentPhaseData = *Rows[0];
+        CurrentPhaseIndex = 0;
+    }
+
+    if (Rows.IsValidIndex(CurrentPhaseIndex + 1))
+    {
+        nextStartTime = Rows[CurrentPhaseIndex + 1]->StartTime;
+    }
+
+    // Initialize ObjectPool
     UPoolManagerSubsystem* PoolManager = GetGameInstance()->GetSubsystem<UPoolManagerSubsystem>();
-    if (PoolManager && !CurrentPhaseData.EnemySpawnInfos.IsEmpty())
+    if (IsValid(PoolManager) && !CurrentPhaseData.EnemySpawnInfos.IsEmpty())
     {
         for (const FEnemySpawnInfo& Info : CurrentPhaseData.EnemySpawnInfos)
         {
-            PoolManager->InitializePoolByClass(Info.EnemyClass, CurrentPhaseData.TargetEnemyCount);
+            PoolManager->InitializePoolByClass(Info.EnemyClass, CurrentPhaseData.TargetEnemyCount * Info.SpawnWeight);
         }
     }
 }
@@ -52,6 +56,11 @@ void ASpawnManager::BeginPlay()
 void ASpawnManager::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
+
+    if (nextStartTime!= -1.f && WaveTimer->GetElapsedTime() >= nextStartTime)
+    {
+        ChangePhase();
+    }
 
     if (CurrentEnemyCount < CurrentPhaseData.TargetEnemyCount)
     {
@@ -73,8 +82,46 @@ void ASpawnManager::OnPhaseChanged(const FPhaseData& NewPhaseData)
     }
 }
 
-void ASpawnManager::OnEnemyDied()
+void ASpawnManager::ChangePhase()
 {
+    int32 nextPhaseIndex = CurrentPhaseIndex + 1;
+    if (!Rows.IsValidIndex(nextPhaseIndex))
+    {
+        UE_LOG(LogTemp, Error, TEXT("Next phase data does not exist."));
+        nextStartTime = -1.f;
+        return;
+    }
+
+    CurrentPhaseData = *Rows[nextPhaseIndex];
+    CurrentPhaseIndex = nextPhaseIndex;
+
+    // nextStartTime 업데이트도 누락되어 있었음!
+    if (Rows.IsValidIndex(CurrentPhaseIndex + 1))
+    {
+        nextStartTime = Rows[CurrentPhaseIndex + 1]->StartTime;
+    }
+    else
+    {
+        nextStartTime = -1.f;
+    }
+
+    // 새 페이즈 풀 초기화
+    UPoolManagerSubsystem* PoolManager = GetGameInstance()->GetSubsystem<UPoolManagerSubsystem>();
+    if (PoolManager)
+    {
+        for (const FEnemySpawnInfo& Info : CurrentPhaseData.EnemySpawnInfos)
+        {
+            PoolManager->InitializePoolByClass(Info.EnemyClass, CurrentPhaseData.TargetEnemyCount * Info.SpawnWeight);
+        }
+    }
+}
+
+void ASpawnManager::OnEnemyDied(TSubclassOf<ABaseEnemy> EnemyClass)
+{
+    if (SpawnedCountMap.Contains(EnemyClass))
+    {
+        SpawnedCountMap[EnemyClass]--;
+    }
     CurrentEnemyCount = FMath::Max(0, CurrentEnemyCount - 1);
 }
 
@@ -93,6 +140,7 @@ void ASpawnManager::SpawnEnemy()
     if (IsValid(Enemy))
     {
         CurrentEnemyCount++;
+        SpawnedCountMap.FindOrAdd(EnemyClass)++;
 
         ABaseEnemy* BaseEnemy = Cast<ABaseEnemy>(Enemy);
         if (BaseEnemy)
@@ -106,27 +154,41 @@ void ASpawnManager::SpawnEnemy()
 
 TSubclassOf<ABaseEnemy> ASpawnManager::SelectEnemyClassByWeight()
 {
-    if (CurrentPhaseData.EnemySpawnInfos.IsEmpty()) return nullptr;
-
-    float TotalWeight = 0.f;
-    for (const FEnemySpawnInfo& Info : CurrentPhaseData.EnemySpawnInfos)
+    if (CurrentPhaseData.EnemySpawnInfos.IsEmpty())
     {
-        TotalWeight += Info.SpawnWeight;
+        UE_LOG(LogTemp, Error, TEXT("Enemy Spawn info does not exist."));
+        return nullptr;
     }
 
-    float RandValue = FMath::FRandRange(0.f, TotalWeight);
-    float AccumulatedWeight = 0.f;
+    float TotalWeight = 1.f;
+
+    // 전체 소환된 수 합산
+    int32 TotalSpawned = 0;
+    for (const FEnemySpawnInfo& Info : CurrentPhaseData.EnemySpawnInfos)
+    {
+        TotalSpawned += SpawnedCountMap.FindOrAdd(Info.EnemyClass); // 소환된 수 Map
+    }
+
+    // 목표 비율 대비 가장 부족한 클래스 선택
+    TSubclassOf<ABaseEnemy> SelectedClass = nullptr;
+    float MaxDeficit = -FLT_MAX;
 
     for (const FEnemySpawnInfo& Info : CurrentPhaseData.EnemySpawnInfos)
     {
-        AccumulatedWeight += Info.SpawnWeight;
-        if (RandValue <= AccumulatedWeight)
+        float TargetRatio = Info.SpawnWeight / TotalWeight;
+        float CurrentRatio = TotalSpawned > 0
+            ? (float)SpawnedCountMap.FindRef(Info.EnemyClass)/ TotalSpawned
+            : 0.f;
+
+        float Deficit = TargetRatio - CurrentRatio; // 부족한 비율
+        if (Deficit > MaxDeficit)
         {
-            return Info.EnemyClass;
+            MaxDeficit = Deficit;
+            SelectedClass = Info.EnemyClass;
         }
     }
 
-    return CurrentPhaseData.EnemySpawnInfos[0].EnemyClass;
+    return SelectedClass;
 }
 
 FVector ASpawnManager::GetRandomSpawnLocation()

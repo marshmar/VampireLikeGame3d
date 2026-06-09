@@ -18,7 +18,9 @@ public:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 	
-	void UpdateTarget(APawn* NewCharacter);
+	virtual void UpdateTarget(APawn* NewCharacter);
+	APawn* GetPlayerPawn() const;
+
 private:
 	/*
 	* Navigation

@@ -5,62 +5,70 @@
 #include "Interfaces/HitInterface.h"
 #include "Interfaces/Poolable.h"
 #include "Entities/Character/CharacterTypes.h"
+#include "Entities/BaseEntity.h"
 #include "BaseEnemy.generated.h"
 
 class UAnimMontage;
 class UAttributeComponent;
+class ABaseCharacter;
 
-// BaseEnemy.h에 추가
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnEnemyDied);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEnemyDied, TSubclassOf<ABaseEnemy>, EnemyClass);
 
 UCLASS()
-class VAMPIRELIKE3D_API ABaseEnemy : public ACharacter, public IHitInterface, public IPoolable
+class VAMPIRELIKE3D_API ABaseEnemy : public ABaseEntity, public IPoolable
 {
 	GENERATED_BODY()
 
 public:
+	/*
+	* FrameWork
+	*/
 	ABaseEnemy();
 
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	virtual void GetHit(const FVector& ImpactPoint) override;
-	void DirectionalHitReact(const FVector& ImpactPoint);
-	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
-
 	virtual void OnAcquired() override;
 	virtual void OnReleased() override;
 
+	/*
+	* Hit
+	*/
+	virtual void GetHit(float DamageAmount, const FVector& ImpactPoint) override;
+	virtual void Die() override;
+
+	/*
+	* Delegates
+	*/
 	UPROPERTY(BlueprintAssignable)
 	FOnEnemyDied OnEnemyDied;
 
-protected:
-	UPROPERTY(BlueprintReadOnly)
-	EDeathPose DeathPose = EDeathPose::EDP_Alive;
+	UFUNCTION()
+	void OnHitReactEnded(UAnimMontage* Montage, bool bInterrupted);
 
-	UPROPERTY(VisibleAnywhere)
-	UAttributeComponent* AttributeComp;
+	UFUNCTION()
+	void OnSpawnMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 
-	virtual void BeginPlay() override;
-
-	void Die(const FVector& ImpactPoint);
-	float CalculateHitDegree(const FVector& ImpactPoint);
-	void UpdateTarget(APawn* NewCharacter);
 	/*
-	* Play montage functions
+	* Montages
 	*/
-	void PlayMontage(const FName& SectionName, UAnimMontage* AnimMontage);
+	UPROPERTY(EditDefaultsOnly, Category = Montages)
+	UAnimMontage* SpawnMontage;
 
+	UFUNCTION()
+	void OnPlayerOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
+		bool bFromSweep, const FHitResult& SweepResult);
+
+	UFUNCTION()
+	void OnPlayerOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+protected:
+	virtual void BeginPlay() override;
+	void UpdateTarget(APawn* NewCharacter);
 
 private:
-	/*
-	* Animation montages
-	*/
-	UPROPERTY(EditDefaultsOnly, Category = Montages)
-	UAnimMontage* HitReactMontage;
-
-	UPROPERTY(EditDefaultsOnly, Category = Montages)
-	UAnimMontage* DeathMontage;
+	UPROPERTY(EditDefaultsOnly, Category = "Effects")
+	UParticleSystem* DeathEffect;
 
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
 	float MaxHealth;
@@ -70,22 +78,15 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 	USceneComponent* HomingTargetPoint;
+	FTimerHandle HitReactTimerHandle;
+
+	void HandleDeath();
 
 	UFUNCTION()
 	void OnDeathMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 
-	FTimerHandle HitReactTimerHandle;
+	FTimerHandle DamageTimerHandle;
+	ABaseCharacter* OverlappingPlayer = nullptr; // 데미지 줄 플레이어 저장
 
-	UFUNCTION()
-	void OnHitReactEnded();
-
-	// BaseEnemy.h 추가
-	UPROPERTY(EditDefaultsOnly, Category = "Effects")
-	UParticleSystem* DeathEffect;
-
-	UPROPERTY(EditDefaultsOnly, Category = Montages)
-	UAnimMontage* SpawnMontage;
-
-	UFUNCTION()
-	void OnSpawnMontageEnded(UAnimMontage* Montage, bool bInterrupted);
+	void ApplyDamageToPlayer();
 };

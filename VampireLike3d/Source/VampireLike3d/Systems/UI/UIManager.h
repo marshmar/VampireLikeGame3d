@@ -7,6 +7,7 @@
 #include "UIManager.generated.h"
 
 class UWaveTimerWidget;
+class UHUDWidget;
 /**
  * 
  */
@@ -16,11 +17,18 @@ class VAMPIRELIKE3D_API UUIManager : public UGameInstanceSubsystem
 	GENERATED_BODY()
 	
 public:
-	void InitializeTimerUI();
+	// HUD에서 위젯 전달받기
+	void SetTimerWidget(UWaveTimerWidget* Widget);
+	void SetHUDWidget(UHUDWidget* Widget);
+
+	// 플레이어에서 호출
+	void UpdateHpBar(float Current, float Max);
+	void UpdateBossHpBar(float Current, float Max);
+	void SetBossHpBar(bool bState);
+private:
+	UPROPERTY()
+	UWaveTimerWidget* WaveTimerWidget;
 
 	UPROPERTY()
-	TSubclassOf<UWaveTimerWidget> WaveTimerWidgetClass;
-
-private:
-	UWaveTimerWidget* WaveTimerWidget;
+	UHUDWidget* HUDWidget;
 };

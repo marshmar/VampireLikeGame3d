@@ -7,14 +7,14 @@
 #include "Combat/Projectile/Projectile.h"
 ANullex::ANullex()
 {
-	AttributeComp->SetAttackRange(2000.f);
-	AttributeComp->SetAttackSpeed(2.f);
-	AttributeComp->SetAtk(20.f);
+	CharAttributeComp->SetAttackRange(2000.f);
+	CharAttributeComp->SetAttackSpeed(2.f);
+	CharAttributeComp->SetAtk(20.f);
 }
 
 void ANullex::BasicAttack()
 {
-	const float AttackRange = AttributeComp->GetAttackRange();
+	const float AttackRange = CharAttributeComp->GetAttackRange();
 	AActor* NearestEnemy = FindNearestEnemy(AttackRange);
 	if (!IsValid(NearestEnemy))
 	{

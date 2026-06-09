@@ -7,6 +7,7 @@
 
 
 class USwapGaugeComponent;
+class UCharacterAttributeComponent;
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnPlayerSwapped, APawn*);
 
@@ -30,9 +31,8 @@ public:
 	void SwapCharacterToNext();
 	void SwapCharacterToPrev();
 
-
 	ABaseCharacter* GetCurrentCharacter();
-
+	UCharacterAttributeComponent* GetSharedAttributeComponent() const;
 protected:
 	virtual void BeginPlay() override;
 
@@ -42,6 +42,7 @@ private:
 	TArray<ABaseCharacter*> SpawnedPartyMembers;
 	int32 ActiveIndex;
 	int32 MaxPartyMember;
+	UCharacterAttributeComponent* SharedAttributeComponent;
 
 	void DisableCharacter(ABaseCharacter* Character);
 	void EnableCharacter(ABaseCharacter* Character);
@@ -49,4 +50,5 @@ private:
 	void HandlePreviousCharacter(int32 SlotIndex);
 	void TransferTransform(int32 SlotIndex);
 	void PossesCharacter(int32 SlotIndex);
+	void InitializePartyState();
 };

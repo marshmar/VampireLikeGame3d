@@ -81,16 +81,7 @@ void AHomingProjectile::OnHit(const FHitResult& HitResult)
 		return;
 	}
 
-	HitActor->GetHit(HitResult.ImpactPoint);
-
-	UGameplayStatics::ApplyDamage(
-		Target,
-		20.0f,
-		GetInstigatorController(),
-		this,
-		UDamageType::StaticClass()
-	);
-
+	HitActor->GetHit(20.0f, HitResult.ImpactPoint);
 	Destroy();
 
 	if (HitParticle == nullptr)

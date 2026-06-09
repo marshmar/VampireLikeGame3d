@@ -8,6 +8,7 @@
 
 class ABaseCharacter;
 class UUIManager;
+class USoundManagerSubsystem;
 UCLASS()
 class VAMPIRELIKE3D_API AMyGameModeBase : public AGameModeBase
 {
@@ -25,4 +26,20 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Party")
 	TSubclassOf<ABaseCharacter> CharacterClass3;
+
+
+	/*
+	* SOUNDS
+	*/
+private:
+	UPROPERTY(EditDefaultsOnly, Category = "Sound|SFX")
+	USoundBase* BossRoarSound;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Sound|SFX")
+	USoundBase* BossJumpSound;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Sound|SFX")
+	USoundBase* BossLandingSound;
+
+	void RegisterSounds(USoundManagerSubsystem* SoundManager);
 };

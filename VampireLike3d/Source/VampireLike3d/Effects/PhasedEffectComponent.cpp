@@ -100,7 +100,10 @@ void UPhasedEffectComponent::PlayStartEffect()
 
 void UPhasedEffectComponent::PlayIdleEffect()
 {
-	OnEffectStarted.Broadcast();
+	if (OnEffectStarted.IsBound())
+	{
+		OnEffectStarted.Broadcast();
+	}
 	CleanupActiveParticle();
 
 	if (IdleParticle == nullptr)
@@ -153,7 +156,10 @@ void UPhasedEffectComponent::OnParticleSystemFinished(UParticleSystemComponent* 
 	case EEffectState::Finishing:
 		SetState(EEffectState::Done);
 		ActiveParticleComponent = nullptr;
-		OnEffectFinished.Broadcast();
+		if (OnEffectFinished.IsBound())
+		{
+			OnEffectFinished.Broadcast();
+		}
 		break;
 
 	default:

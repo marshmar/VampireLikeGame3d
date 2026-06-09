@@ -6,17 +6,38 @@
 #include "Kismet/GameplayStatics.h"
 #include "Systems/Wave/WaveTimer.h"
 #include "Systems/Wave/WaveTimerWidget.h"
+#include "Systems/UI/HUDWidget.h"
+#include "Systems/UI/UIManager.h"
+
 
 void AGameHUD::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (WaveTimerWidgetClass != nullptr)
-	{
-		TimerWidget = CreateWidget<UWaveTimerWidget>(GetOwningPlayerController(), WaveTimerWidgetClass);
-		TimerWidget->AddToViewport();
+    UUIManager* UIManager = GetGameInstance()->GetSubsystem<UUIManager>();
+    if (!UIManager) return;
 
-		AWaveTimer* WaveTimer = Cast<AWaveTimer>(UGameplayStatics::GetActorOfClass(GetWorld(), AWaveTimer::StaticClass()));
-		TimerWidget->SetWaveTimer(WaveTimer);
-	}
+    // 위젯 생성은 HUD에서, 관리는 UIManager에서
+    APlayerController* Controller = UGameplayStatics::GetPlayerController(GetGameInstance(), 0);
+
+    if (WaveTimerWidgetClass)
+    {
+        TimerWidget = CreateWidget<UWaveTimerWidget>(Controller, WaveTimerWidgetClass);
+        if (TimerWidget)
+        {
+            TimerWidget->AddToViewport();
+            UIManager->SetTimerWidget(TimerWidget);  // UIManager에 전달
+        }
+    }
+
+    if (HUDWidgetClass)
+    {
+        HUDWidget = CreateWidget<UHUDWidget>(Controller, HUDWidgetClass);
+        if (HUDWidget)
+        {
+            HUDWidget->AddToViewport();
+            UIManager->SetHUDWidget(HUDWidget);  // UIManager에 전달
+            UIManager->SetBossHpBar(false);
+        }
+    }
 }

@@ -2,10 +2,12 @@
 #include "Kismet/GameplayStatics.h"
 #include "Entities/Character/CharacterAttributeComponent.h"
 #include "Interfaces/HitInterface.h"
+#include "Utils/CollisionDefinitions.h"
+
 AGareth::AGareth()
 {
-	AttributeComp->SetAttackSpeed(1.0f);
-	AttributeComp->SetAttackRange(1000.0f);
+	CharAttributeComp->SetAttackSpeed(1.0f);
+	CharAttributeComp->SetAttackRange(1000.0f);
 }
 
 void AGareth::BasicAttack()
@@ -54,37 +56,69 @@ void AGareth::OnSwapAttackHit()
 	const float HitRange = 1000.0f; 
 	const float Damge = 60.0f;
 
-	UKismetSystemLibrary::SphereTraceMulti(
-		GetWorld(), Center, Center, HitRange,
-		UEngineTypes::ConvertToTraceType(ECC_Pawn),
-		false, TArray<AActor*>(),
-		EDrawDebugTrace::None, // EDrawDebugTrace::ForDuration
-		HitResults, true);
+	// 이펙트 범위만큼 오버랩 체크
+	TArray<FOverlapResult> OverlapResults;
+	FCollisionShape CollisionShape = FCollisionShape::MakeSphere(HitRange); // 이펙트 크기랑 맞추기
+
+	GetWorld()->OverlapMultiByChannel(
+		OverlapResults,
+		Center,
+		FQuat::Identity,
+		ECC_Enemy, // Player만 감지
+		CollisionShape
+	);
+
+	//DrawDebugSphere(
+	//	GetWorld(),
+	//		Center,
+	//		HitRange,
+	//	12,
+	//	FColor::Red,
+	//	false,  // 지속 표시 여부
+	//	2.f     // 표시 시간 (초)
+	//);
 
 
-	for (FHitResult& HitResult : HitResults)
+	TArray<AActor*> HitActors; // 중복 방지
+
+	for (FOverlapResult& Result : OverlapResults)
 	{
-		AActor* HitActor = HitResult.GetActor();
-		if (!IsValid(HitActor))
-		{
-			continue;
-		}
+		AActor* HitActor = Result.GetActor();
+		if (!IsValid(HitActor)) continue;
 
-		UGameplayStatics::ApplyDamage(
-			HitActor,
-			Damge,
-			GetController(),
-			this,
-			UDamageType::StaticClass()
-		);
+		// 중복 피격 방지
+		if (HitActors.Contains(HitActor)) continue;
+		HitActors.Add(HitActor);
 
 		IHitInterface* HitInterface = Cast<IHitInterface>(HitActor);
-		if (HitInterface == nullptr)
-		{
-			continue;
-		}
-		HitInterface->GetHit(HitResult.ImpactPoint);
+		if (!HitInterface) continue;
+
+		HitInterface->GetHit(AttributeComp->GetAtk(), Center);
 	}
+
+	//UKismetSystemLibrary::SphereTraceMulti(
+	//	GetWorld(), Center, Center, HitRange,
+	//	UEngineTypes::ConvertToTraceType(ECC_Enemy),
+	//	false, TArray<AActor*>(),
+	//	EDrawDebugTrace::None, // EDrawDebugTrace::ForDuration
+	//	HitResults, true);
+
+
+	//for (FHitResult& HitResult : HitResults)
+	//{
+	//	AActor* HitActor = HitResult.GetActor();
+	//	if (!IsValid(HitActor))
+	//	{
+	//		continue;
+	//	}
+
+	//	IHitInterface* HitInterface = Cast<IHitInterface>(HitActor);
+	//	if (HitInterface == nullptr)
+	//	{
+	//		continue;
+	//	}
+	//	HitInterface->GetHit(Damge, HitResult.ImpactPoint);
+	//}
 }
 
 void AGareth::OnSwapAttackMove()

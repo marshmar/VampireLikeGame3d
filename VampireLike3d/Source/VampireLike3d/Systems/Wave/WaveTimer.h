@@ -1,8 +1,3 @@
-/*
-* 웨이브 타이머
-* 타이머 초기화, 틱에서 타이머 감소, 현재 타이머 받아오기, 일정 시간마다 페이즈 변경 이벤트 발생
-*/
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -11,7 +6,7 @@
 #include "Systems/Wave/PhaseData.h"
 #include "WaveTimer.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPhaseChanged, const FPhaseData&, PhaseData);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTimeEnded);
 
 UCLASS()
 class VAMPIRELIKE3D_API AWaveTimer : public AActor
@@ -23,23 +18,25 @@ public:
 	AWaveTimer();
 	virtual void Tick(float DeltaTime) override;
 
-	UPROPERTY(EditAnywhere)
-	UDataTable* PhaseDataTable;
-
-	UPROPERTY(BlueprintAssignable)
-	FOnPhaseChanged OnPhaseChanged;
-
 protected:
 	virtual void BeginPlay() override;
 
 private:
-	float RemainingTime;
-	float WaveDuration;
-	int32 CurrentPhaseIndex;
-	void CheckPhase();
 
+	UPROPERTY(BlueprintAssignable)
+	FOnTimeEnded OnTimeEnded;
+
+	UPROPERTY(VisibleAnywhere)
+	float RemainingTime;
+
+	UPROPERTY(VisibleAnywhere)
+	float WaveDuration;
+
+	void EndTime() const;
 // Getter & Setter
 public:
 	float GetRemainingTime() const;
+	float GetElapsedTime() const;
 	void DecreaseRemainingTime(float Value);
+
 };

@@ -4,6 +4,7 @@
 #include "Systems/UI/UIManager.h"
 #include "Systems/ObjectPool/PoolManagerSubsystem.h"
 #include "Entities/Enemies/BaseEnemy.h"
+#include "Systems/Sound/SoundManagerSubsystem.h"
 
 void AMyGameModeBase::BeginPlay()
 {
@@ -39,9 +40,21 @@ void AMyGameModeBase::BeginPlay()
 	//	PoolManager->InitializePool<ABaseEnemy>(50);
 	//}
 
-	UUIManager* UIManager = GetGameInstance()->GetSubsystem<UUIManager>();
-	if (IsValid(UIManager))
+	//UUIManager* UIManager = GetGameInstance()->GetSubsystem<UUIManager>();
+	//if (IsValid(UIManager))
+	//{
+	//}
+
+	USoundManagerSubsystem* SoundManager = GetGameInstance()->GetSubsystem<USoundManagerSubsystem>();
+	if (IsValid(SoundManager))
 	{
-		UIManager->InitializeTimerUI();
+		//RegisterSounds(SoundManager);
 	}
+}
+
+void AMyGameModeBase::RegisterSounds(USoundManagerSubsystem* SoundManager)
+{
+	SoundManager->RegisterSFX(ESFXType::BossRoar, BossRoarSound);
+	SoundManager->RegisterSFX(ESFXType::BossJump, BossJumpSound);
+	SoundManager->RegisterSFX(ESFXType::BossLanding, BossLandingSound);
 }

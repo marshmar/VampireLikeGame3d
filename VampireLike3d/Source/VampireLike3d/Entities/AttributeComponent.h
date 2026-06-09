@@ -24,28 +24,28 @@ private:
 	/*
 	* HP
 	*/
-	UPROPERTY(VisibleAnywhere, Category = "Attributes")
+	UPROPERTY(EditDefaultsOnly, Category = "Attributes")
 	float MaxHP;
 
-	UPROPERTY(VisibleAnywhere, Category = "Attributes")
+	UPROPERTY(EditDefaultsOnly, Category = "Attributes")
 	float CurHP;
 
 	/*
 	* ATK
 	*/
-	UPROPERTY(VisibleAnywhere, Category = "Attributes")
+	UPROPERTY(EditDefaultsOnly, Category = "Attributes")
 	float Atk;
 
 	/*
 	* DEF
 	*/
-	UPROPERTY(VisibleAnywhere, Category = "Attributes")
+	UPROPERTY(EditDefaultsOnly, Category = "Attributes")
 	float Armor;
 
 	/*
 	* Move
 	*/
-	UPROPERTY(VisibleAnywhere, Category = "Attributes")
+	UPROPERTY(EditDefaultsOnly, Category = "Attributes")
 	float MoveSpeed;
 
 #pragma region Getter & Setter

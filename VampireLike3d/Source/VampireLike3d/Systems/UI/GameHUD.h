@@ -12,6 +12,7 @@
  */
 
 class UWaveTimerWidget;
+class UHUDWidget;
 
 UCLASS()
 class VAMPIRELIKE3D_API AGameHUD : public AHUD
@@ -22,7 +23,11 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<UWaveTimerWidget> WaveTimerWidgetClass;
 
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<UHUDWidget> HUDWidgetClass;
+
 	virtual void BeginPlay() override;
 private:
 	UWaveTimerWidget* TimerWidget;
+	UHUDWidget* HUDWidget;
 };

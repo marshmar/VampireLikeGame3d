@@ -1,5 +1,6 @@
 #include "PartyManager.h"
 #include "SwapGaugeComponent.h"
+#include "Entities/Character/CharacterAttributeComponent.h"
 
 APartyManager::APartyManager()
 {
@@ -8,6 +9,9 @@ APartyManager::APartyManager()
 
 	ActiveIndex = 0;
 	MaxPartyMember = 3;
+
+	SharedAttributeComponent = CreateDefaultSubobject<UCharacterAttributeComponent>(TEXT("SharedAttributeComponent"));
+	InitializePartyState();
 }
 
 void APartyManager::BeginPlay()
@@ -24,8 +28,12 @@ void APartyManager::SpawnPartyMembers()
 			continue;
 		}
 
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.SpawnCollisionHandlingOverride =
+			ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
 		ABaseCharacter* Spawned = GetWorld()->SpawnActor<ABaseCharacter>(
-			PartyMembers[i], FVector::ZeroVector, FRotator::ZeroRotator);
+			PartyMembers[i], FVector::ZeroVector, FRotator::ZeroRotator, SpawnParams);
 
 		if (Spawned)
 		{
@@ -99,6 +107,11 @@ void APartyManager::SwapCharacterToPrev()
 ABaseCharacter* APartyManager::GetCurrentCharacter()
 {
 	return SpawnedPartyMembers[ActiveIndex];
+}
+
+UCharacterAttributeComponent* APartyManager::GetSharedAttributeComponent() const
+{
+	return SharedAttributeComponent;
 }
 
 void APartyManager::DisableCharacter(ABaseCharacter* Character)
@@ -215,7 +228,21 @@ void APartyManager::PossesCharacter(int32 SlotIndex)
 	NewCharacter->StartAttackTimer();
 	ActiveIndex = SlotIndex;
 
-
 	// Broadcast player swap event
-	OnPlayerSwapped.Broadcast(Cast<APawn>(NewCharacter));
+	if (OnPlayerSwapped.IsBound())
+	{
+		OnPlayerSwapped.Broadcast(Cast<APawn>(NewCharacter));
+	}
+
+}
+
+void APartyManager::InitializePartyState()
+{
+	SharedAttributeComponent->SetMaxHP(300.0f);
+	SharedAttributeComponent->SetCurHP(SharedAttributeComponent->GetMaxHP());
+	SharedAttributeComponent->SetAtk(20.0f);
+	SharedAttributeComponent->SetArmor(20.0f);
+	SharedAttributeComponent->SetMoveSpeed(150.0f);
+	SharedAttributeComponent->SetHpRecovery(0.f);
+	SharedAttributeComponent->SetLifeSteal(0.f);
 }

@@ -37,7 +37,7 @@ void USwapGaugeComponent::OnChargeTimer()
 void USwapGaugeComponent::ChargeGauge(float Amount)
 {
 	CurGauge = FMath::Clamp(CurGauge + Amount, 0.f, MaxGauge);
-	UE_LOG(LogTemp, Warning, TEXT("CurGage: %f"), CurGauge);
+	//UE_LOG(LogTemp, Warning, TEXT("CurGage: %f"), CurGauge);
 }
 
 void USwapGaugeComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)

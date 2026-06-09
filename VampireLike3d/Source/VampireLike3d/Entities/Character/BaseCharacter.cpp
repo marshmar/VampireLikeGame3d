@@ -9,6 +9,9 @@
 #include "Kismet/GameplayStatics.h"
 #include "BaseCharacterAnimInstance.h"
 #include "Particles/ParticleSystemComponent.h"
+#include "Utils/CollisionDefinitions.h"
+#include "Components/CapsuleComponent.h"
+#include "Systems/UI/UIManager.h"
 
 ABaseCharacter::ABaseCharacter()
 {
@@ -17,6 +20,12 @@ ABaseCharacter::ABaseCharacter()
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
 	bUseControllerRotationRoll = false;
+
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision); // 메쉬 콜리전 완전히 끔
+
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Enemy, ECR_Overlap);
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Player, ECollisionResponse::ECR_Ignore);
+	GetCapsuleComponent()->SetCollisionObjectType(ECC_Player);
 
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	GetCharacterMovement()->RotationRate = FRotator(0.f, 400.f, 0.f);
@@ -35,8 +44,7 @@ ABaseCharacter::ABaseCharacter()
 	ViewCamera->SetRelativeLocation(FVector(-200.f, 0.f, 0.f));
 	ViewCamera->SetRelativeRotation(FRotator(-20.f, 0.f, 0.f));
 
-	// Setup Attribute Component
-	AttributeComp = CreateDefaultSubobject<UCharacterAttributeComponent>(TEXT("CharacterAttributeComponent"));
+	CharAttributeComp = CreateDefaultSubobject<UCharacterAttributeComponent>(TEXT("CharacterAttributeComponent"));
 
 }
 
@@ -48,6 +56,12 @@ void ABaseCharacter::BeginPlay()
 	if (!IsValid(PartyManager))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("%s's PartyManager failed to assign"), *GetName())
+	}
+
+	SharedAttributeComp = PartyManager->GetSharedAttributeComponent();
+	if (!IsValid(SharedAttributeComp))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("SharedAttributeComponent didn't set up"), *GetName())
 	}
 }
 
@@ -136,16 +150,48 @@ void ABaseCharacter::RotateTo(FVector& Direction)
 	CameraBoom->SetWorldRotation(CameraWorldRotation);
 }
 
-void ABaseCharacter::PlayMontage(const FName& SectionName, UAnimMontage* AnimMontage)
+void ABaseCharacter::GetHit(float DamageAmount, const FVector& ImpactPoint)
 {
-	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	if (AnimInstance == nullptr || AnimMontage == nullptr)
+	if (!IsValid(SharedAttributeComp))
 	{
+		UE_LOG(LogTemp, Error, TEXT("SharedAttributeComponent didn't set up"), *GetName());
 		return;
 	}
 
-	AnimInstance->Montage_Play(AnimMontage);
-	AnimInstance->Montage_JumpToSection(SectionName, AnimMontage);
+	SharedAttributeComp->ReceiveDamage(CalculateFinalDamage(DamageAmount));
+	UE_LOG(LogTemp, Warning, TEXT("Left player hp: %f"), SharedAttributeComp->GetCurHP())
+
+	UUIManager* UIManager = GetGameInstance()->GetSubsystem<UUIManager>();
+	if (UIManager)
+		UIManager->UpdateHpBar(SharedAttributeComp->GetCurHP(), SharedAttributeComp->GetMaxHP());
+
+	if (SharedAttributeComp->IsAlive())
+	{
+		DirectionalHitReact(ImpactPoint);
+	}
+	else
+	{
+		DirectionalDeath(ImpactPoint);
+		Die();
+	}
+}
+
+float ABaseCharacter::CalculateFinalDamage(float DamageAmount)
+{
+	float BaseDefense = SharedAttributeComp->GetArmor();
+	float DefenseMultiplier = CharAttributeComp->GetArmor(); // 캐릭터별 계수
+	float FinalDefense = BaseDefense * DefenseMultiplier;
+
+	// 비율 방어 공식
+	float DamageReduction = 100.f / (100.f + FinalDefense);
+	float FinalDamage = DamageAmount * DamageReduction;
+
+	return FMath::Max(FinalDamage, 1.f); // 최소 1 보장
+}
+
+void ABaseCharacter::Die()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Game Over!!"));
 }
 
 AActor* ABaseCharacter::FindNearestEnemy(float Distance)
@@ -188,22 +234,6 @@ AActor* ABaseCharacter::FindNearestEnemy(float Distance)
 	return NearestEnemy;
 }
 
-void ABaseCharacter::SpawnEffectAtLocation(UParticleSystem* Effect, const FVector& SpawnLocation, const FRotator& SpawnRotation)
-{
-	if (Effect == nullptr)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("%s's %s is not set"), *GetName(), *Effect->GetName())
-		return;
-	}
-
-	UGameplayStatics::SpawnEmitterAtLocation(
-		GetWorld(),
-		Effect,
-		SpawnLocation,
-		SpawnRotation
-	);
-}
-
 FTargetingTransform ABaseCharacter::GetTargetingTransform(AActor* Target, const FName& SocketName) const
 {
 	FTargetingTransform OutData;
@@ -227,7 +257,7 @@ void ABaseCharacter::StartAttackTimer()
 		BasicAttackTimerHandle,
 		this,
 		&ABaseCharacter::BasicAttack,
-		AttributeComp->GetAttackSpeed(),
+		CharAttributeComp->GetAttackSpeed(),
 		true
 	);
 }

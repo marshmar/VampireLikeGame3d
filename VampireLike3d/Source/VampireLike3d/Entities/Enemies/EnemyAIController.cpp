@@ -27,4 +27,9 @@ void AEnemyAIController::UpdateTarget(APawn* NewCharacter)
 	PlayerPawn = NewCharacter;
 }
 
+APawn* AEnemyAIController::GetPlayerPawn() const
+{
+	return PlayerPawn;
+}
+
 

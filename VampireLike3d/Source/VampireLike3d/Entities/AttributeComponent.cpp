@@ -14,7 +14,7 @@ bool UAttributeComponent::IsAlive() const
 void UAttributeComponent::ReceiveDamage(float Damage)
 {
 	CurHP = FMath::Clamp(CurHP - Damage, 0.f, MaxHP);
-	UE_LOG(LogTemp, Warning, TEXT("%s health: %f"), *GetName(), CurHP);
+	//UE_LOG(LogTemp, Warning, TEXT("%s health: %f"), *GetName(), CurHP);
 }
 
 void UAttributeComponent::BeginPlay()

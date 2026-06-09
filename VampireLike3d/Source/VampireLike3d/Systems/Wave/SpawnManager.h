@@ -19,7 +19,7 @@ public:
     AWaveTimer* WaveTimer;
 
     UFUNCTION()
-    void OnEnemyDied();
+    void OnEnemyDied(TSubclassOf<ABaseEnemy> EnemyClass);
 
 protected:
     virtual void BeginPlay() override;
@@ -27,7 +27,18 @@ protected:
 private:
     FPhaseData CurrentPhaseData;
     int32 CurrentEnemyCount;
+    int32 CurrentPhaseIndex;
+    float nextStartTime;
+    TArray<FPhaseData*> Rows;
 
+    UPROPERTY(EditAnywhere)
+    UDataTable* PhaseDataTable;
+
+    // SpawnManager 헤더에 추가
+    UPROPERTY(VisibleAnywhere)
+    TMap<TSubclassOf<ABaseEnemy>, int32> SpawnedCountMap;
+
+    void ChangePhase();
     void SpawnEnemy();
     FVector GetRandomSpawnLocation();
     TSubclassOf<ABaseEnemy> SelectEnemyClassByWeight();

@@ -11,14 +11,17 @@ void AWaveTimer::BeginPlay()
 
 	WaveDuration = 900.f;
 	RemainingTime = WaveDuration;
-	CurrentPhaseIndex = 0;
 }
 
 void AWaveTimer::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
     RemainingTime = FMath::Max(0.f, RemainingTime - DeltaTime);
-    CheckPhase();
+	if (RemainingTime == 0)
+	{
+		PrimaryActorTick.bCanEverTick = false;
+		EndTime();
+	}
 }
 
 float AWaveTimer::GetRemainingTime() const
@@ -26,29 +29,20 @@ float AWaveTimer::GetRemainingTime() const
 	return this->RemainingTime;
 }
 
+float AWaveTimer::GetElapsedTime() const
+{
+	return WaveDuration - RemainingTime;
+}
+
 void AWaveTimer::DecreaseRemainingTime(float Value)
 {
 	RemainingTime = FMath::Max(0.f, RemainingTime - Value);
 }
 
-void AWaveTimer::CheckPhase()
+void AWaveTimer::EndTime() const
 {
-    if (!PhaseDataTable)
-    {
-        UE_LOG(LogTemp, Warning, TEXT("PhaseDataTable is null"));
-        return;
-    }
-
-    TArray<FPhaseData*> Rows;
-    PhaseDataTable->GetAllRows<FPhaseData>(TEXT(""), Rows);
-
-    if (!Rows.IsValidIndex(CurrentPhaseIndex + 1)) return;
-
-    float ElapsedTime = WaveDuration - RemainingTime;
-    if (ElapsedTime >= Rows[CurrentPhaseIndex + 1]->StartTime)
-    {
-        UE_LOG(LogTemp, Warning, TEXT("Phase Changed"));
-        CurrentPhaseIndex++;
-        OnPhaseChanged.Broadcast(*Rows[CurrentPhaseIndex]);
-    }
+	if (OnTimeEnded.IsBound())
+	{
+		OnTimeEnded.Broadcast();
+	}
 }

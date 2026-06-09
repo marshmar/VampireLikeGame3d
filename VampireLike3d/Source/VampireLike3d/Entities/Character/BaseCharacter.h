@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Systems/ObjectPool/PoolManagerSubsystem.h"
+#include "Entities/BaseEntity.h"
 #include "BaseCharacter.generated.h"
 
 
@@ -10,6 +11,7 @@ class USpringArmComponent;
 class UCameraComponent;
 class APartyManager;
 class UCharacterAttributeComponent;
+class USwapAttackComponent;
 class UBaseCharacterAnimInstance;
 
 DECLARE_MULTICAST_DELEGATE(FOnSwapAttackEnded);
@@ -27,7 +29,7 @@ struct FTargetingTransform
 
 
 UCLASS(Abstract)
-class VAMPIRELIKE3D_API ABaseCharacter : public ACharacter
+class VAMPIRELIKE3D_API ABaseCharacter : public ABaseEntity
 {
 	GENERATED_BODY()
 
@@ -55,6 +57,12 @@ public:
 	void SetSwapAttacking(bool State);
 	void RotateTo(FVector& Direction);
 
+	/*
+	* Hit
+	*/
+	virtual void GetHit(float DamageAmount, const FVector& ImpactPoint) override;
+	virtual float CalculateFinalDamage(float DamageAmount) override;
+	virtual void Die() override;
 protected:
 	UPROPERTY(VisibleAnywhere)
 	USpringArmComponent* CameraBoom;
@@ -69,8 +77,10 @@ protected:
 	FTimerHandle BasicAttackTimerHandle;
 
 	UPROPERTY(VisibleAnywhere)
-	UCharacterAttributeComponent* AttributeComp;
+	UCharacterAttributeComponent* SharedAttributeComp;
 
+	UPROPERTY(VisibleAnywhere)
+	UCharacterAttributeComponent* CharAttributeComp;
 	/*
 	* Anim Montage
 	*/
@@ -94,12 +104,7 @@ protected:
 	void SwapCharacter();
 	virtual void BasicAttack();
 	virtual AActor* FindNearestEnemy(float Distance);
-	virtual void SpawnEffectAtLocation(UParticleSystem* Effect, const FVector& SpawnLocation, const FRotator& SpawnRotation);
 	virtual FTargetingTransform GetTargetingTransform(AActor* Target, const FName& SocketName) const;
-	/*
-	* Play montage functions
-	*/
-	void PlayMontage(const FName& SectionName, UAnimMontage* AnimMontage);
 
 private:
 	UPROPERTY(VisibleAnywhere)

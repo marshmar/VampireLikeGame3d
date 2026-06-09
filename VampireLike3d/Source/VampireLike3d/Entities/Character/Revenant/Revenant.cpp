@@ -11,14 +11,14 @@
 
 ARevenant::ARevenant()
 {
-	AttributeComp->SetAttackRange(1000.0f);
-	AttributeComp->SetAttackSpeed(3.0f);
+	CharAttributeComp->SetAttackRange(1000.0f);
+	CharAttributeComp->SetAttackSpeed(3.0f);
 }
 
 
 void ARevenant::BasicAttack()
 {
-	const float AttackRange = AttributeComp->GetAttackRange();
+	const float AttackRange = CharAttributeComp->GetAttackRange();
 
 	AActor* NearestEnemy = FindNearestEnemy(AttackRange);
 	if (!NearestEnemy)
@@ -73,7 +73,7 @@ void ARevenant::BasicAttack()
 
 void ARevenant::ApplyFanShapedAttack(const FVector& StartLocation, const FVector& ForwardDirection)
 {
-	const float AttackRange = AttributeComp->GetAttackRange();
+	const float AttackRange = CharAttributeComp->GetAttackRange();
 	const float AttackAngle = 30.f;
 	const float Damage = 20.f;
 
@@ -111,20 +111,12 @@ void ARevenant::ApplyFanShapedAttack(const FVector& StartLocation, const FVector
 
 		HitActors.Add(HitActor);
 
-		UGameplayStatics::ApplyDamage(
-			HitActor,
-			Damage,
-			GetController(),
-			this,
-			UDamageType::StaticClass()
-		);
-
 		IHitInterface* HitInterface = Cast<IHitInterface>(HitActor);
 		if (HitInterface == nullptr)
 		{
 			continue;
 		}
-		HitInterface->GetHit(HitActor->GetActorLocation());
+		HitInterface->GetHit(Damage, HitActor->GetActorLocation());
 	}
 }
 
@@ -206,7 +198,7 @@ void ARevenant::OnSwapAttackHit()
 			return;
 		}
 
-		HitActor->GetHit(HitResult.ImpactPoint);
+		HitActor->GetHit(Damage, HitResult.ImpactPoint);
 	}
 }
 

@@ -18,16 +18,16 @@ ABaseEnemy::ABaseEnemy()
 	GetMesh()->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
-	GetMesh()->SetGenerateOverlapEvents(true);
+	GetMesh()->SetCollisionResponseToChannel(ECC_Player, ECR_Ignore); // ← 추가
+
+	GetCapsuleComponent()->SetGenerateOverlapEvents(true);
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Player, ECollisionResponse::ECR_Ignore);
 	GetCapsuleComponent()->SetCollisionObjectType(ECC_Enemy);
+	GetCharacterMovement()->bPushForceScaledToMass = false;     // 밀기 힘 끔
 
 	AIControllerClass = AEnemyAIController::StaticClass();
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
-
-	// Setup AttributeComponent
-	AttributeComp = CreateDefaultSubobject<UAttributeComponent>(TEXT("AttributeComponent"));
-	AttributeComp->SetMoveSpeed(75.0f);
 
 	// Set MoveSpeed
 	GetCharacterMovement()->MaxWalkSpeed = AttributeComp->GetMoveSpeed();
@@ -43,62 +43,23 @@ void ABaseEnemy::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	UE_LOG(LogTemp, Warning, TEXT("BeginPlay 호출"));
 	AttributeComp->SetMaxHP(20.f);
 	AttributeComp->SetCurHP(AttributeComp->GetMaxHP());
+	AttributeComp->SetAtk(20.f);
 
 	APartyManager* PartyManager = Cast<APartyManager>(UGameplayStatics::GetActorOfClass(GetWorld(), APartyManager::StaticClass()));
 	if (IsValid(PartyManager))
 	{
 		PartyManager->OnPlayerSwapped.AddUObject(this, &ABaseEnemy::UpdateTarget);
 	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Can't find PartyManager class in world"));
+	}
+
+	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &ABaseEnemy::OnPlayerOverlap);
+	GetCapsuleComponent()->OnComponentEndOverlap.AddDynamic(this, &ABaseEnemy::OnPlayerOverlapEnd);
 }
-
-void ABaseEnemy::PlayMontage(const FName& SectionName, UAnimMontage* AnimMontage)
-{
-	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	if (AnimInstance == nullptr || AnimMontage == nullptr)
-	{
-		return;
-	}
-	AnimInstance->Montage_Play(AnimMontage);
-	AnimInstance->Montage_JumpToSection(SectionName, AnimMontage);
-}
-
-
-void ABaseEnemy::Die(const FVector& ImpactPoint)
-{
-	// 사망 시 완전히 멈춤
-	GetCharacterMovement()->DisableMovement();
-	GetCharacterMovement()->StopMovementImmediately();
-
-	// AI 비활성화
-	AEnemyAIController* AIController = Cast<AEnemyAIController>(GetController());
-	if (AIController)
-	{
-		AIController->StopMovement();
-	}
-
-	const float Theta = CalculateHitDegree(ImpactPoint);
-	FName Section("DeathBack");
-	DeathPose = EDeathPose::EDP_DeathBack;
-	if (Theta >= -90.f && Theta < 90.f)
-	{
-		Section = FName("DeathForward");
-		DeathPose = EDeathPose::EDP_DeathForward;
-	}
-	PlayMontage(Section, DeathMontage);
-
-	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	if (AnimInstance)
-	{
-		// 중복 방지
-		AnimInstance->OnMontageEnded.RemoveDynamic(this, &ABaseEnemy::OnDeathMontageEnded);
-		AnimInstance->OnMontageEnded.AddDynamic(this, &ABaseEnemy::OnDeathMontageEnded);
-	}
-}
-
-
 
 void ABaseEnemy::Tick(float DeltaTime)
 {
@@ -110,141 +71,90 @@ void ABaseEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 }
 
-void ABaseEnemy::GetHit(const FVector& ImpactPoint)
-{
-	if (AttributeComp->IsAlive())
+void ABaseEnemy::OnPlayerOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
+	bool bFromSweep, const FHitResult& SweepResult)
+{	
+
+	UE_LOG(LogTemp, Warning, TEXT("Object overlap detectioned"))
+	OverlappingPlayer = Cast<ABaseCharacter>(OtherActor);
+	if (OverlappingPlayer)
 	{
-		DirectionalHitReact(ImpactPoint);
-	}
-	else
-	{
-		Die(ImpactPoint);
+		UE_LOG(LogTemp, Warning, TEXT("Player is in"));
+		// 타이머가 이미 실행 중이면 중복 등록 방지
+		if (GetWorldTimerManager().IsTimerActive(DamageTimerHandle)) return;
+
+		UE_LOG(LogTemp, Warning, TEXT("Set timer"));
+		ApplyDamageToPlayer();
+		//GetWorldTimerManager().SetTimer(
+		//	DamageTimerHandle,
+		//	this,
+		//	&ABaseEnemy::ApplyDamageToPlayer,
+		//	1.0f,  // 1초마다
+		//	true   // 반복
+		//);
 	}
 }
 
-float ABaseEnemy::CalculateHitDegree(const FVector& ImpactPoint)
+void ABaseEnemy::OnPlayerOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	const FVector Forward = GetActorForwardVector();
-	// Lower Impact Point to the Enemy's Actor Location Z
-	const FVector ImpactLowered(ImpactPoint.X, ImpactPoint.Y, GetActorLocation().Z);
-	const FVector ToHit = (ImpactLowered - GetActorLocation()).GetSafeNormal();
-
-	// Forward * ToHit = |Forward| |TOHit| * cos(theta)
-	// |Forward| = 1, |ToHit| = 1, so Forward * ToHit = cos(theta)
-	const double CosTheta = FVector::DotProduct(Forward, ToHit);
-	// Take the inverse cosine (arc-cosine) of cos(theta) to get theta
-	double Theta = FMath::Acos(CosTheta);
-	// convert from radians to degrees
-	Theta = FMath::RadiansToDegrees(Theta);
-
-	// if CrossProduct points down, Theta should be negative
-	const FVector CrossProduct = FVector::CrossProduct(Forward, ToHit);
-	if (CrossProduct.Z < 0)
+	if (Cast<ABaseCharacter>(OtherComp))
 	{
-		Theta *= -1.f;
+		UE_LOG(LogTemp, Warning, TEXT("Player is out"));
+		OverlappingPlayer = nullptr;
+		//GetWorldTimerManager().ClearTimer(DamageTimerHandle);
 	}
-
-	return Theta;
 }
 
-void ABaseEnemy::DirectionalHitReact(const FVector& ImpactPoint)
+void ABaseEnemy::GetHit(float DamageAmount, const FVector& ImpactPoint)
 {
-	// 피격 시 잠깐 움직임 멈춤
 	GetCharacterMovement()->DisableMovement();
 
-	// 히트 리액션 몽타주 끝나면 움직임 재개
+	Super::GetHit(DamageAmount, ImpactPoint);
+
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	if (AnimInstance && HitReactMontage)
+	if (AnimInstance)
 	{
-		float MontageDuration = AnimInstance->Montage_Play(HitReactMontage);
-		GetWorldTimerManager().SetTimer(
-			HitReactTimerHandle,
-			this,
-			&ABaseEnemy::OnHitReactEnded,
-			MontageDuration,
-			false
-		);
+		AnimInstance->OnMontageEnded.RemoveDynamic(this, &ABaseEnemy::OnHitReactEnded);
+		AnimInstance->OnMontageEnded.AddDynamic(this, &ABaseEnemy::OnHitReactEnded);
 	}
-
-	const float Theta = CalculateHitDegree(ImpactPoint);
-
-	// Hit Direction Guide
-	// https://github.com/user-attachments/assets/e92be45f-3fdb-4a39-a2f5-f1246c1d1425
-	FName Section("FromBack");
-	if (Theta >= -45.f && Theta < 45.f)
-	{
-		Section = FName("FromFront");
-	}
-	else if (Theta >= -135.f && Theta < -45.f)
-	{
-		Section = FName("FromLeft");
-	}
-	else if (Theta >= 45.f && Theta < 135.f)
-	{
-		Section = FName("FromRight");
-	}
-	PlayMontage(Section, HitReactMontage);
-
-	#pragma region Debug
-	//UKismetSystemLibrary::DrawDebugArrow(this, GetActorLocation(), GetActorLocation() + CrossProduct * 300, 5.f, FColor::Blue, 5.f);
-	//if (GEngine)
-	//{
-	//	GEngine->AddOnScreenDebugMessage(1, 5.f, FColor::Green, FString::Printf(TEXT("Theta: %f"), Theta));
-	//}
-
-	//UKismetSystemLibrary::DrawDebugArrow(this, GetActorLocation(), GetActorLocation() + Forward * 60, 5.f, FColor::Red, 5.f);
-	//UKismetSystemLibrary::DrawDebugArrow(this, GetActorLocation(), GetActorLocation() + ToHit * 100, 5.f, FColor::Green, 5.f);
-	#pragma endregion
 }
 
 void ABaseEnemy::UpdateTarget(APawn* NewCharacter)
 {
 	if (NewCharacter == nullptr)
 	{
+		UE_LOG(LogTemp, Error, TEXT("Failed to update target becase of NewCharacter is nullptr"));
 		return;
 	}
 
 	AEnemyAIController* AIController = Cast<AEnemyAIController>(GetController());
 	if (!IsValid(AIController))
 	{
+		UE_LOG(LogTemp, Error, TEXT("%s's AIController didn't set up"), *GetName());
 		return;
 	}
 
 	AIController->UpdateTarget(NewCharacter);
 }
 
-float ABaseEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
-{
-	// TODO: AttributeComp에서 데미지 깎기 전에 버프/디버프 같은 효과 적용 필요
-	AttributeComp->ReceiveDamage(DamageAmount);
-	return 0.0f;
-}
-
 void ABaseEnemy::OnDeathMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
 	if (Montage != DeathMontage) return;
 
-	// 이펙트 소환
-	if (DeathEffect)
-	{
-		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), DeathEffect, GetActorLocation());
-	}
-
-	if (OnEnemyDied.IsBound())
-	{
-		OnEnemyDied.Broadcast();
-	}
-
-	UPoolManagerSubsystem* PoolManager = GetGameInstance()->GetSubsystem<UPoolManagerSubsystem>();
-	if (PoolManager)
-	{
-		PoolManager->ReleaseActorByClass(this);
-	}
-
-
+	HandleDeath();
 }
 
-void ABaseEnemy::OnHitReactEnded()
+void ABaseEnemy::ApplyDamageToPlayer()
+{
+	if (OverlappingPlayer)
+	{
+		OverlappingPlayer->GetHit(AttributeComp->GetAtk(), GetActorLocation());
+	}
+}
+
+void ABaseEnemy::OnHitReactEnded(UAnimMontage* Montage, bool bInterrupted)
 {
 	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
 }
@@ -254,12 +164,17 @@ void ABaseEnemy::OnAcquired()
 	// HP 초기화
 	AttributeComp->SetCurHP(AttributeComp->GetMaxHP());
 	DeathPose = EDeathPose::EDP_Alive;
-	UE_LOG(LogTemp, Warning, TEXT("MaxHP: %f, CurHP: %f"),
-		AttributeComp->GetMaxHP(), AttributeComp->GetCurHP());
+	//UE_LOG(LogTemp, Warning, TEXT("MaxHP: %f, CurHP: %f"),
+	//	AttributeComp->GetMaxHP(), AttributeComp->GetCurHP());
+
+	// Set MoveSpeed
+	GetCharacterMovement()->MaxWalkSpeed = AttributeComp->GetMoveSpeed();
 
 	// 스폰될 때 움직임 막기
 	GetCharacterMovement()->DisableMovement();
 
+	// 충돌 활성화
+	GetCapsuleComponent()->SetGenerateOverlapEvents(true);
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if (AnimInstance)
 	{
@@ -275,11 +190,15 @@ void ABaseEnemy::OnAcquired()
 			PlayMontage(Section, SpawnMontage);
 		}
 	}
+
+
 }
 
 void ABaseEnemy::OnReleased()
 {
 	OnEnemyDied.Clear();
+
+	//UE_LOG(LogTemp, Warning, TEXT("%s's OnReleased was called"), *GetName());
 
 	// 몽타주 콜백 해제
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
@@ -287,6 +206,36 @@ void ABaseEnemy::OnReleased()
 	{
 		AnimInstance->OnMontageEnded.RemoveDynamic(this, &ABaseEnemy::OnDeathMontageEnded);
 	}
+
+	//UE_LOG(LogTemp, Warning, TEXT("%s's OnReleased was succesfully called"), *GetName());
+}
+
+
+void ABaseEnemy::Die()
+{
+	Super::Die();
+
+	// 사망 시 완전히 멈춤
+	GetCharacterMovement()->DisableMovement();
+	GetCharacterMovement()->StopMovementImmediately();
+
+	// 충돌 비활성화
+	GetCapsuleComponent()->SetGenerateOverlapEvents(false);
+
+	// AI 비활성화
+	AEnemyAIController* AIController = Cast<AEnemyAIController>(GetController());
+	if (AIController)
+	{
+		AIController->StopMovement();
+	}
+
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance)
+	{
+		AnimInstance->OnMontageEnded.RemoveDynamic(this, &ABaseEnemy::OnDeathMontageEnded);
+		AnimInstance->OnMontageEnded.AddDynamic(this, &ABaseEnemy::OnDeathMontageEnded);
+	}
+
 }
 
 void ABaseEnemy::OnSpawnMontageEnded(UAnimMontage* Montage, bool bInterrupted)
@@ -300,6 +249,26 @@ void ABaseEnemy::OnSpawnMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 	if (AnimInstance)
 	{
 		AnimInstance->OnMontageEnded.RemoveDynamic(this, &ABaseEnemy::OnSpawnMontageEnded);
+	}
+}
+
+void ABaseEnemy::HandleDeath()
+{
+	// 이펙트 소환
+	if (DeathEffect)
+	{
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), DeathEffect, GetActorLocation());
+	}
+
+	if (OnEnemyDied.IsBound())
+	{
+		OnEnemyDied.Broadcast(this->GetClass());
+	}
+
+	UPoolManagerSubsystem* PoolManager = GetGameInstance()->GetSubsystem<UPoolManagerSubsystem>();
+	if (PoolManager)
+	{
+		PoolManager->ReleaseActorByClass(this);
 	}
 }
 

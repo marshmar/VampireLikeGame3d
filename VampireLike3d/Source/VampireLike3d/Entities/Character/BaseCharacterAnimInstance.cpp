@@ -43,7 +43,11 @@ void UBaseCharacterAnimInstance::AnimNotify_SwapAttackEnd()
 		return;
 	}
 	BaseCharacter->SetSwapAttacking(false);
-	BaseCharacter->OnSwapAttackEnded.Broadcast();
+	if (BaseCharacter->OnSwapAttackEnded.IsBound())
+	{
+		BaseCharacter->OnSwapAttackEnded.Broadcast();
+	}
+
 }
 
 void UBaseCharacterAnimInstance::AnimNotify_SwapAttackEffectStart()

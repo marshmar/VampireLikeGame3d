@@ -16,5 +16,5 @@ class VAMPIRELIKE3D_API IHitInterface
 	GENERATED_BODY()
 
 public:
-	virtual void GetHit(const FVector& ImpactPoint) = 0;
+	virtual void GetHit(float DamageAmount, const FVector& ImpactPoint) = 0;
 };

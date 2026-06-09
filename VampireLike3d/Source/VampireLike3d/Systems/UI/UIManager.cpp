@@ -4,29 +4,31 @@
 #include "Systems/UI/UIManager.h"
 #include "Systems/Wave/WaveTimerWidget.h"
 #include "Kismet/GameplayStatics.h"
+#include "Systems/UI/HUDWidget.h"
 
-void UUIManager::InitializeTimerUI()
+void UUIManager::SetTimerWidget(UWaveTimerWidget* Widget)
 {
-	APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetGameInstance(), 0);
-	if (!IsValid(PlayerController))
-	{
-		UE_LOG(LogTemp, Warning, TEXT("PlayerController is nullptr"));
-		return;
-	}
+	this->WaveTimerWidget = Widget;
+}
 
-	WaveTimerWidgetClass = StaticLoadClass(UUserWidget::StaticClass(), nullptr,
-		TEXT("/Game/BluePrints/Systems/Wave/WBP_WaveTimer.WBP_WaveTimer_C"));
+void UUIManager::SetHUDWidget(UHUDWidget* Widget)
+{
+	this->HUDWidget = Widget;
+}
 
-	UE_LOG(LogTemp, Warning, TEXT("LoadedClass: %s"), WaveTimerWidgetClass ? *WaveTimerWidgetClass->GetName() : TEXT("nullptr"));
-	if (!IsValid(WaveTimerWidgetClass))
-	{
-		UE_LOG(LogTemp, Warning, TEXT("WaveTimerWidgetClass is nullptr"));
-		return;
-	}
+void UUIManager::UpdateHpBar(float Current, float Max)
+{
+	if (IsValid(HUDWidget))
+		HUDWidget->UpdateHpBar(Current, Max);
+}
 
-	WaveTimerWidget = CreateWidget<UWaveTimerWidget>(PlayerController, WaveTimerWidgetClass);
-	if (IsValid(WaveTimerWidget))
-	{
-		WaveTimerWidget->AddToViewport();
-	}
+void UUIManager::UpdateBossHpBar(float Current, float Max)
+{
+	if (IsValid(HUDWidget))
+		HUDWidget->UpdateBossHpBar(Current, Max);
+}
+void UUIManager::SetBossHpBar(bool bState)
+{
+	if (IsValid(HUDWidget))
+		HUDWidget->SetBossHpBar(bState);
 }
